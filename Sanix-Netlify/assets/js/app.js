@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     navigator.clipboard.writeText(text).then(() => {
       window.showToast(successMsg, "success");
       if (window.Sani) window.Sani.say("Copied to your clipboard!", "happy", 2500);
-      window.showThankYouModal("Copy", "Copied to clipboard successfully!");
     }).catch(() => {
       window.showToast("Failed to copy to clipboard", "error");
     });
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="sanix-modal-card">
           <div class="sanix-modal-icon">🎉</div>
           <h3 class="sanix-modal-title">Thank You for using Sanix Tool!</h3>
-          <p class="sanix-modal-body" id="sanix-modal-msg">${customMsg || "Your action completed successfully. 100% free, fast & private."}</p>
+          <p class="sanix-modal-body" id="sanix-modal-msg">${customMsg || "Your file has been downloaded successfully. 100% free, fast & private."}</p>
           <div class="sanix-modal-author">
             ✨ Designed & Developed with ❤️ by <strong>Sanni Singh</strong>
           </div>
@@ -75,22 +74,25 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('sanix_tool_usage', JSON.stringify(counts));
     } catch (e) {}
 
-    window.showThankYouModal(toolName, `Thank you for using ${toolName}! Your result is ready.`);
+    window.showThankYouModal(toolName, `Thank you for downloading your file with ${toolName}!`);
   };
 
-  // 5. Automatic listener for download / process / export buttons across all tools
+  // 5. Automatic listener ONLY for FINAL DOWNLOAD buttons
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('button, a.btn');
+    const btn = e.target.closest('button, a.btn, a[download]');
     if (!btn) return;
     
-    const text = (btn.textContent || '').toLowerCase();
+    const text = (btn.textContent || '').toLowerCase().trim();
     const id = (btn.id || '').toLowerCase();
-    const isDownloadOrAction = text.includes('download') || text.includes('convert') || text.includes('compress') || text.includes('calculate') || text.includes('generate') || text.includes('merge') || text.includes('split') || id.includes('download') || id.includes('process');
+    const hasDownloadAttr = btn.hasAttribute('download');
 
-    if (isDownloadOrAction && !btn.classList.contains('fav-btn') && !btn.classList.contains('theme-toggle') && !btn.classList.contains('sanix-modal-close-btn')) {
+    // ONLY trigger when user clicks an actual DOWNLOAD button
+    const isFinalDownloadBtn = hasDownloadAttr || text.includes('download') || id.includes('download');
+
+    if (isFinalDownloadBtn && !btn.classList.contains('fav-btn') && !btn.classList.contains('theme-toggle') && !btn.classList.contains('sanix-modal-close-btn')) {
       setTimeout(() => {
-        window.showThankYouModal("Tool Action", "Thank you for using Sanix Tool! Your action was executed successfully.");
-      }, 400);
+        window.showThankYouModal("Download", "Thank you for using Sanix Tool! Your file download has started.");
+      }, 500);
     }
   });
 });
