@@ -26,7 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // 3. Thank You Pop-up Modal (Designed & Developed by Sanni Singh)
+  // 3. Thank You Pop-up Modal (Designed & Developed by Sanni Singh - Auto Close in 5 Seconds)
+  window.thankYouTimer = null;
+
   window.showThankYouModal = function(actionName, customMsg) {
     let modal = document.getElementById('sanix-thankyou-modal');
     if (!modal) {
@@ -53,12 +55,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (msgElem && customMsg) msgElem.textContent = customMsg;
     }
 
+    if (window.thankYouTimer) clearTimeout(window.thankYouTimer);
+
     setTimeout(() => {
       modal.classList.add('active');
     }, 50);
+
+    // Auto-close modal automatically after 5 seconds (5000ms)
+    window.thankYouTimer = setTimeout(() => {
+      window.closeThankYouModal();
+    }, 5000);
   };
 
   window.closeThankYouModal = function() {
+    if (window.thankYouTimer) clearTimeout(window.thankYouTimer);
     const modal = document.getElementById('sanix-thankyou-modal');
     if (modal) {
       modal.classList.remove('active');
