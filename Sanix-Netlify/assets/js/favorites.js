@@ -1,5 +1,5 @@
 /**
- * SANIX TOOL - Favorites System
+ * SANIX TOOL - Favorites System (Client-side localStorage)
  */
 
 (function () {
@@ -17,65 +17,40 @@
     localStorage.setItem(LOCAL_FAVS_KEY, JSON.stringify(favs));
   }
 
-  async function toggleFavorite(toolName, btnElement) {
-    const isLoggedIn = document.body.hasAttribute('data-logged-in');
+  function toggleFavorite(toolName, btnElement) {
+    let favs = getLocalFavorites();
+    const index = favs.indexOf(toolName);
+    let isFav = false;
 
-    if (isLoggedIn) {
-      try {
-        const formData = new FormData();
-        formData.append('tool_name', toolName);
-        formData.append('csrf_token', window.CSRF_TOKEN || '');
-
-        const response = await fetch('/api/favorites.php', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await response.json();
-
-        if (data.success) {
-          btnElement.classList.toggle('active', data.is_favorite);
-          btnElement.innerHTML = data.is_favorite ? '❤️' : '🤍';
-          window.showToast(data.message, 'success');
-          if (window.Sani) window.Sani.say(data.is_favorite ? "Added to your favorites!" : "Removed from favorites", "happy");
-        } else {
-          window.showToast(data.message || 'Error updating favorites', 'error');
-        }
-      } catch (err) {
-        window.showToast('Network error saving favorite', 'error');
-      }
+    if (index > -1) {
+      favs.splice(index, 1);
+      isFav = false;
     } else {
-      // Guest localStorage state
-      let favs = getLocalFavorites();
-      const index = favs.indexOf(toolName);
-      let isFav = false;
+      favs.push(toolName);
+      isFav = true;
+    }
 
-      if (index > -1) {
-        favs.splice(index, 1);
-        isFav = false;
-      } else {
-        favs.push(toolName);
-        isFav = true;
-      }
-
-      setLocalFavorites(favs);
-      btnElement.classList.toggle('active', isFav);
-      btnElement.innerHTML = isFav ? '❤️' : '🤍';
-      window.showToast(isFav ? 'Added to favorites (Saved in browser)' : 'Removed from favorites', 'info');
+    setLocalFavorites(favs);
+    btnElement.classList.toggle('active', isFav);
+    btnElement.innerHTML = isFav ? '❤️' : '🤍';
+    
+    if (window.showToast) {
+      window.showToast(isFav ? 'Added to favorites' : 'Removed from favorites', 'info');
+    }
+    if (window.Sani) {
+      window.Sani.say(isFav ? "Added to your favorites!" : "Removed from favorites", "happy");
     }
   }
 
   function syncFavoritesUI() {
-    const isLoggedIn = document.body.hasAttribute('data-logged-in');
-    if (!isLoggedIn) {
-      const favs = getLocalFavorites();
-      document.querySelectorAll('.fav-btn').forEach(btn => {
-        const tool = btn.getAttribute('data-tool');
-        if (favs.includes(tool)) {
-          btn.classList.add('active');
-          btn.innerHTML = '❤️';
-        }
-      });
-    }
+    const favs = getLocalFavorites();
+    document.querySelectorAll('.fav-btn').forEach(btn => {
+      const tool = btn.getAttribute('data-tool');
+      if (favs.includes(tool)) {
+        btn.classList.add('active');
+        btn.innerHTML = '❤️';
+      }
+    });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
