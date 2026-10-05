@@ -1,0 +1,52 @@
+<?php
+$pageTitle = "About Sanix Tool - Privacy-First Online Tools";
+$pageDesc = "Learn about Sanix Tool, our privacy-first browser processing technology and production design.";
+require_once __DIR__ . '/includes/header.php';
+?>
+
+<div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+  <div style="text-align: center; max-width: 760px; margin: 0 auto 3.5rem;">
+    <h1 style="font-size: 2.8rem; margin-bottom: 1rem;">
+      Built For <span class="gradient-text">Speed, Privacy & Quality</span>
+    </h1>
+    <p style="color: var(--text-muted); font-size: 1.15rem; line-height: 1.7;">
+      Sanix Tool is a professional, production-grade online tools platform engineered to process your files and data directly inside your web browser.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
+    <div class="card card-hoverable">
+      <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--primary);">🔒</div>
+      <h3>Privacy First</h3>
+      <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">
+        Your files and data are processed entirely in browser memory. Nothing gets stored or transmitted to external servers.
+      </p>
+    </div>
+
+    <div class="card card-hoverable">
+      <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--secondary);">⚡</div>
+      <h3>Blazing Fast</h3>
+      <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">
+        Zero network latency for image processing, PDF manipulation, and text tools. Instant results without upload waiting times.
+      </p>
+    </div>
+
+    <div class="card card-hoverable">
+      <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--success);">💯</div>
+      <h3>100% Free & Working</h3>
+      <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">
+        No paywalls, hidden limitations, or fake placeholder tools. Every single feature on Sanix Tool is fully functional.
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="text-align: center; padding: 3rem 1.5rem; background: linear-gradient(135deg, var(--surface) 0%, var(--surface-hover) 100%);">
+    <h2 style="margin-bottom: 0.75rem;">Meet SANI — Your Virtual Assistant</h2>
+    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 1.5rem;">
+      Sani is integrated naturally into the Sanix Tool workspace to give helpful tips, guide tool usage, and keep your experience interactive.
+    </p>
+    <a href="<?= BASE_URL ?>tools.php" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Try Our Tools Now</a>
+  </div>
+</div>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

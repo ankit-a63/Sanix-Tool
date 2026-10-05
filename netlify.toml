@@ -1,0 +1,265 @@
+# SANIX TOOL - Netlify Build & Pretty Routing Configuration
+
+[build]
+  publish = "."
+
+# Security Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+
+# Main Page Rewrites
+[[redirects]]
+  from = "/tools"
+  to = "/tools.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/favorites"
+  to = "/favorites.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+  force = true
+
+# Image Tools
+[[redirects]]
+  from = "/tools/image/compressor"
+  to = "/tools/image/compressor.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/resizer"
+  to = "/tools/image/resizer.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/bg-remover"
+  to = "/tools/image/bg-remover.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/id-photo"
+  to = "/tools/image/id-photo.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/passport-photo"
+  to = "/tools/image/passport-photo.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/image-to-pdf"
+  to = "/tools/image/image-to-pdf.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/cropper"
+  to = "/tools/image/cropper.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/converter"
+  to = "/tools/image/converter.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/image/rotator"
+  to = "/tools/image/rotator.html"
+  status = 200
+  force = true
+
+# PDF Tools
+[[redirects]]
+  from = "/tools/pdf/merger"
+  to = "/tools/pdf/merger.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/pdf/splitter"
+  to = "/tools/pdf/splitter.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/pdf/rotator"
+  to = "/tools/pdf/rotator.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/pdf/metadata"
+  to = "/tools/pdf/metadata.html"
+  status = 200
+  force = true
+
+# Text Tools
+[[redirects]]
+  from = "/tools/text/counter"
+  to = "/tools/text/counter.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/text/case-converter"
+  to = "/tools/text/case-converter.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/text/line-tools"
+  to = "/tools/text/line-tools.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/text/cleaner"
+  to = "/tools/text/cleaner.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/text/slug-generator"
+  to = "/tools/text/slug-generator.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/text/lorem-ipsum"
+  to = "/tools/text/lorem-ipsum.html"
+  status = 200
+  force = true
+
+# Developer Tools
+[[redirects]]
+  from = "/tools/developer/json"
+  to = "/tools/developer/json.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/developer/base64"
+  to = "/tools/developer/base64.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/developer/url"
+  to = "/tools/developer/url.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/developer/uuid"
+  to = "/tools/developer/uuid.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/developer/hash"
+  to = "/tools/developer/hash.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/developer/timestamp"
+  to = "/tools/developer/timestamp.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/developer/color"
+  to = "/tools/developer/color.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/developer/regex"
+  to = "/tools/developer/regex.html"
+  status = 200
+  force = true
+
+# Calculator Tools
+[[redirects]]
+  from = "/tools/calculator/basic"
+  to = "/tools/calculator/basic.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/calculator/percentage"
+  to = "/tools/calculator/percentage.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/calculator/age"
+  to = "/tools/calculator/age.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/calculator/emi"
+  to = "/tools/calculator/emi.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/calculator/unit"
+  to = "/tools/calculator/unit.html"
+  status = 200
+  force = true
+
+# File Tools
+[[redirects]]
+  from = "/tools/file/info"
+  to = "/tools/file/info.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/file/zip"
+  to = "/tools/file/zip.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/tools/file/hash"
+  to = "/tools/file/hash.html"
+  status = 200
+  force = true

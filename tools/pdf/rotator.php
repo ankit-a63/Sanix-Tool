@@ -1,0 +1,303 @@
+<?php
+$pageTitle = "PDF Page Rotator - Sanix Tool";
+$pageDesc = "Rotate pages in your PDF document by 90, 180 or 270 degrees.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="tool-workspace" style="max-width: 900px; margin: 0 auto;">
+    
+    <!-- TOOL HEADER -->
+    <div class="tool-header">
+      <div class="tool-header-info">
+        <div class="tool-icon">🔄</div>
+        <div>
+          <h1 class="tool-header-title">PDF Page Rotator</h1>
+          <p class="tool-header-desc">Fix upside-down or sideways pages in your PDF document.</p>
+        </div>
+      </div>
+      <button class="fav-btn" data-tool="pdf-rotator" title="Favorite this tool">🤍</button>
+    </div>
+
+    <!-- STEP 1: FILE SELECTION DROPZONE -->
+    <div class="dropzone" id="pdf-dropzone">
+      <div class="dropzone-icon">📁</div>
+      <div class="dropzone-text" style="font-size: 1.25rem; font-weight: 700;">Drop your PDF file here</div>
+      <div style="margin: 0.75rem 0;">
+        <span class="btn btn-primary" style="pointer-events: none;">[ Choose PDF File ]</span>
+      </div>
+      <div class="dropzone-subtext">Upload a PDF document to rotate all pages</div>
+      <input type="file" id="pdf-input" accept="application/pdf">
+    </div>
+
+    <!-- STEP 2: READING STATE -->
+    <div id="reading-card" class="reading-state-card" style="display: none;">
+      <div class="state-badge state-badge-info" style="margin-bottom: 0.75rem;">
+        <span>⚡ Reading file...</span>
+      </div>
+      <h3 id="reading-filename" style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.25rem;">document.pdf</h3>
+      <small id="reading-filesize" style="color: var(--text-muted); font-size: 0.85rem;">Calculating size...</small>
+      
+      <div class="progress-container">
+        <div class="progress-bar-fill" id="reading-progress-fill"></div>
+      </div>
+      <div id="reading-percent-text" style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">0%</div>
+    </div>
+
+    <!-- STEP 3: FILE READY & PROCEED -->
+    <div id="file-ready-card" class="file-ready-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+        <span class="state-badge state-badge-success">✓ File Ready</span>
+        <button class="btn btn-secondary" id="change-file-btn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Change PDF</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; background: var(--input-bg); padding: 1rem; border-radius: 12px; border: 1px solid var(--surface-border);">
+        <div>
+          <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">PDF Document Name</small>
+          <h4 id="ready-filename" style="font-size: 1.05rem; word-break: break-all; color: var(--text-main);">document.pdf</h4>
+        </div>
+
+        <div style="display: flex; gap: 2rem;">
+          <div>
+            <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Total Pages</small>
+            <div id="ready-pages" style="font-size: 1rem; font-weight: 700; color: var(--primary);">0 Pages</div>
+          </div>
+          <div>
+            <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">File Size</small>
+            <div id="ready-filesize" style="font-size: 1rem; font-weight: 700; color: var(--text-main);">0 MB</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROCEED BUTTON -->
+      <button class="proceed-btn" id="proceed-btn">
+        <span>➜ PROCEED TO ROTATION OPTIONS</span>
+      </button>
+    </div>
+
+    <!-- STEP 4: OPTIONS PANEL -->
+    <div id="options-panel" class="card" style="display: none; margin-top: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.1rem; color: var(--primary);">Choose Rotation Angle</h3>
+        <span class="state-badge state-badge-info">Step 4 — Configure</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Rotation Angle</label>
+        <select id="rot-angle" class="form-control" style="font-size: 1rem; font-weight: 600;">
+          <option value="90">90° Clockwise</option>
+          <option value="180">180° Flip</option>
+          <option value="270">270° Counter-Clockwise</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <button class="btn btn-primary" id="rotate-action-btn" style="width: 100%; padding: 0.95rem; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: var(--glow-shadow);">
+          🔄 ROTATE PDF PAGES NOW
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 5 & 6: RESULT PANEL -->
+    <div id="result-container" class="tool-result-box" style="display: none; margin-top: 1.5rem;">
+      <div class="result-header" style="margin-bottom: 1.25rem;">
+        <span class="result-title" style="color: var(--success); font-size: 1.25rem; font-weight: 800;">✓ PDF Pages Rotated</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; align-items: center;">
+        <div class="card" style="text-align: center; padding: 1rem; background: var(--input-bg);">
+          <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Rotation Applied</small>
+          <h3 id="res-angle-text" style="color: var(--primary); margin-top: 0.3rem;">90°</h3>
+        </div>
+
+        <button class="btn btn-primary" id="download-rotated-btn" style="padding: 0.9rem; font-size: 1.1rem; font-weight: 800; background: linear-gradient(135deg, var(--success) 0%, #059669 100%); border: none;">
+          ⬇️ DOWNLOAD ROTATED PDF
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Vendor Scripts -->
+<script src="<?= BASE_URL ?>assets/vendor/pdf-lib.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  trackToolUsage('pdf-rotator');
+
+  const dropzone = document.getElementById('pdf-dropzone');
+  const pdfInput = document.getElementById('pdf-input');
+
+  const readingCard = document.getElementById('reading-card');
+  const readingFilename = document.getElementById('reading-filename');
+  const readingFilesize = document.getElementById('reading-filesize');
+  const readingProgressFill = document.getElementById('reading-progress-fill');
+  const readingPercentText = document.getElementById('reading-percent-text');
+
+  const fileReadyCard = document.getElementById('file-ready-card');
+  const readyFilename = document.getElementById('ready-filename');
+  const readyPages = document.getElementById('ready-pages');
+  const readyFilesize = document.getElementById('ready-filesize');
+  const changeFileBtn = document.getElementById('change-file-btn');
+  const proceedBtn = document.getElementById('proceed-btn');
+
+  const optionsPanel = document.getElementById('options-panel');
+  const rotAngleSelect = document.getElementById('rot-angle');
+  const rotateActionBtn = document.getElementById('rotate-action-btn');
+
+  const resultContainer = document.getElementById('result-container');
+  const resAngleText = document.getElementById('res-angle-text');
+  const downloadRotatedBtn = document.getElementById('download-rotated-btn');
+
+  let currentFile = null;
+  let pdfDoc = null;
+  let rotatedPdfBlob = null;
+  let readingTimer = null;
+
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function resetState() {
+    dropzone.style.display = 'block';
+    readingCard.style.display = 'none';
+    fileReadyCard.style.display = 'none';
+    optionsPanel.style.display = 'none';
+    resultContainer.style.display = 'none';
+    pdfInput.value = '';
+    pdfDoc = null;
+    rotatedPdfBlob = null;
+    if (readingTimer) clearInterval(readingTimer);
+  }
+
+  function processFileSelection(file) {
+    if (!file || !file.type.includes('pdf')) {
+      showToast("Please select a valid PDF file", "error");
+      return;
+    }
+
+    currentFile = file;
+
+    dropzone.style.display = 'none';
+    fileReadyCard.style.display = 'none';
+    optionsPanel.style.display = 'none';
+    resultContainer.style.display = 'none';
+
+    readingFilename.textContent = file.name;
+    readingFilesize.textContent = formatBytes(file.size);
+    readingCard.style.display = 'block';
+
+    let progress = 0;
+    readingProgressFill.style.width = '0%';
+    readingPercentText.textContent = '0%';
+
+    if (readingTimer) clearInterval(readingTimer);
+
+    readingTimer = setInterval(() => {
+      progress += Math.floor(Math.random() * 25) + 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(readingTimer);
+        finishFileReading(file);
+      }
+      readingProgressFill.style.width = `${progress}%`;
+      readingPercentText.textContent = `${progress}%`;
+    }, 40);
+  }
+
+  async function finishFileReading(file) {
+    if (typeof PDFLib === 'undefined') {
+      readingCard.style.display = 'none';
+      showToast("PDF Library loading error. Please refresh.", "error");
+      resetState();
+      return;
+    }
+
+    try {
+      const buffer = await file.arrayBuffer();
+      pdfDoc = await PDFLib.PDFDocument.load(buffer);
+
+      readyFilename.textContent = file.name;
+      readyPages.textContent = `${pdfDoc.getPageCount()} Pages`;
+      readyFilesize.textContent = formatBytes(file.size);
+
+      readingCard.style.display = 'none';
+      fileReadyCard.style.display = 'block';
+
+      if (window.Sani) {
+        window.Sani.say("PDF loaded! Click Proceed to select rotation angle.", "happy");
+      }
+    } catch (err) {
+      readingCard.style.display = 'none';
+      showToast("Failed to load PDF file", "error");
+      resetState();
+    }
+  }
+
+  pdfInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) processFileSelection(e.target.files[0]);
+  });
+
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) processFileSelection(e.dataTransfer.files[0]);
+  });
+
+  proceedBtn.addEventListener('click', () => {
+    optionsPanel.style.display = 'block';
+    optionsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (window.Sani) window.Sani.say("Select rotation angle and click Rotate PDF Pages Now.", "info");
+  });
+
+  rotateActionBtn.addEventListener('click', async () => {
+    if (!pdfDoc) return;
+    const degrees = parseInt(rotAngleSelect.value);
+
+    rotateActionBtn.disabled = true;
+    rotateActionBtn.innerHTML = '⚡ Processing... Please wait';
+
+    try {
+      const pages = pdfDoc.getPages();
+      pages.forEach(p => {
+        const currentRot = p.getRotation().angle;
+        p.setRotation(PDFLib.degrees((currentRot + degrees) % 360));
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      rotatedPdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+      rotateActionBtn.disabled = false;
+      rotateActionBtn.innerHTML = '🔄 ROTATE PDF PAGES NOW';
+
+      resAngleText.textContent = `${degrees}° Clockwise`;
+      resultContainer.style.display = 'block';
+      resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      showToast("PDF pages rotated successfully!", "success");
+    } catch (err) {
+      rotateActionBtn.disabled = false;
+      rotateActionBtn.innerHTML = '🔄 ROTATE PDF PAGES NOW';
+      showToast("Error rotating PDF pages: " + err.message, "error");
+    }
+  });
+
+  downloadRotatedBtn.addEventListener('click', () => {
+    if (!rotatedPdfBlob) return;
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(rotatedPdfBlob);
+    link.download = 'sanix-rotated.pdf';
+    link.click();
+    showToast("Downloaded rotated PDF!", "success");
+  });
+
+  changeFileBtn.addEventListener('click', resetState);
+});
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

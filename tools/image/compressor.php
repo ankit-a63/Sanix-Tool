@@ -1,0 +1,657 @@
+<?php
+// Prevent browser caching of this tool page during debugging
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
+$pageTitle = "Image Compressor - Sanix Tool";
+$pageDesc = "Compress JPG, PNG and WEBP images directly in your browser with high quality and privacy.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<!-- SELF-CONTAINED STYLES FOR COMPRESSOR STATE MACHINE -->
+<style>
+.compressor-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--surface, #1e293b);
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.compressor-dropzone {
+  border: 2px dashed var(--primary, #00f2fe);
+  border-radius: 16px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  background: var(--input-bg, #0f172a);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.compressor-dropzone:hover, .compressor-dropzone.dragover {
+  background: rgba(0, 242, 254, 0.08);
+  border-color: #00c6ff;
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
+}
+
+.compressor-dropzone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.compressor-card {
+  background: var(--input-bg, #0f172a);
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.compressor-progress-track {
+  width: 100%;
+  height: 14px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 1.25rem 0 0.75rem 0;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.compressor-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00f2fe 0%, #00c6ff 100%);
+  border-radius: 999px;
+  transition: width 0.15s ease-out;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+}
+
+.compressor-proceed-btn {
+  width: 100%;
+  padding: 1.1rem 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #00f2fe 0%, #00c6ff 100%);
+  color: #040914;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(0, 242, 254, 0.35);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.compressor-proceed-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 242, 254, 0.5);
+  filter: brightness(1.08);
+}
+
+.status-badge-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  background: rgba(0, 242, 254, 0.15);
+  color: #00f2fe;
+  border: 1px solid rgba(0, 242, 254, 0.3);
+}
+
+.status-badge-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+</style>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="compressor-container">
+    
+    <!-- TOOL HEADER -->
+    <div class="tool-header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--surface-border);">
+      <div class="tool-header-info" style="display: flex; align-items: center; gap: 1rem;">
+        <div class="tool-icon" style="font-size: 2.2rem;">🖼️</div>
+        <div>
+          <h1 class="tool-header-title" style="font-size: 1.6rem; margin: 0;">Image Compressor</h1>
+          <p class="tool-header-desc" style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">Reduce image file size with high visual quality directly in your browser.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. DROPZONE CONTAINER -->
+    <div id="compressorDropzone" class="compressor-dropzone">
+      <div style="font-size: 3.2rem; margin-bottom: 0.5rem;">📁</div>
+      <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Drop your image here</div>
+      <div style="margin: 0.85rem 0;">
+        <button type="button" id="chooseImageBtn" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-size: 1.05rem; pointer-events: none;">[ Choose Image ]</button>
+      </div>
+      <div style="font-size: 0.88rem; color: var(--text-muted);">Supported Formats: <strong>JPG • PNG • WEBP</strong></div>
+      <input type="file" id="compressorFileInput" accept="image/jpeg,image/png,image/webp" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 20;" onchange="if(this.files && this.files[0] && window.handleCompressorFile) window.handleCompressorFile(this.files[0]);">
+    </div>
+
+    <!-- 2. READING STATE CONTAINER -->
+    <div id="compressorReading" class="compressor-card" style="display: none; text-align: center; padding: 2.5rem 1.5rem;">
+      <span class="status-badge-info">⚡ Reading file...</span>
+      <h3 id="readingFileName" style="font-size: 1.15rem; color: var(--text-main); margin-top: 0.75rem; word-break: break-all;">image.jpg</h3>
+      <small id="readingFileSize" style="color: var(--text-muted);">Calculating size...</small>
+
+      <div class="compressor-progress-track">
+        <div id="readingProgressFill" class="compressor-progress-fill"></div>
+      </div>
+      <div id="readingPercentText" style="font-size: 0.95rem; font-weight: 800; color: var(--primary);">0%</div>
+    </div>
+
+    <!-- 3. FILE READY CONTAINER -->
+    <div id="compressorReady" class="compressor-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+        <span id="readyStatusBadge" class="status-badge-ready">✓ File Ready</span>
+        <button type="button" class="btn btn-secondary" id="changeImageBtn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Change Image</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center;">
+        <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 12px; border: 1px solid var(--surface-border);">
+          <img id="readyImagePreview" src="" alt="Selected Preview" style="max-width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px;">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <div>
+            <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">File Name</small>
+            <h4 id="readyFileName" style="font-size: 1.1rem; word-break: break-all; color: var(--text-main); margin: 0;">filename.jpg</h4>
+          </div>
+
+          <div style="display: flex; gap: 2rem;">
+            <div>
+              <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Original Size</small>
+              <div id="readyFileSize" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">0 MB</div>
+            </div>
+            <div>
+              <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; font-weight: 700;">Dimensions</small>
+              <div id="readyDimensions" style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">0 × 0 px</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROCEED TO COMPRESS BUTTON -->
+      <button type="button" id="proceedCompressBtn" class="compressor-proceed-btn">
+        <span>➜ PROCEED TO COMPRESS</span>
+      </button>
+    </div>
+
+    <!-- 4. OPTIONS CONTAINER -->
+    <div id="compressorOptions" class="compressor-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.15rem; color: var(--primary); margin: 0;">Compression Settings</h3>
+        <span class="status-badge-info">Step 4 — Configure</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+        <!-- QUALITY SLIDER -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="display: flex; justify-content: space-between; font-weight: 600;">
+            <span>Quality Level</span>
+            <strong id="compressQualityValue" style="color: var(--primary); font-size: 1.1rem;">80%</strong>
+          </label>
+          <input type="range" id="compressQuality" min="5" max="100" value="80" class="form-control" style="cursor: pointer; height: 10px; margin-top: 0.4rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">
+            <span>Smallest File (5%)</span>
+            <span>Best Quality (100%)</span>
+          </div>
+        </div>
+
+        <!-- OUTPUT FORMAT SELECTOR -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem; display: block;">Output Format</label>
+          <select id="compressFormat" class="form-control" style="font-size: 1rem; font-weight: 600;">
+            <option value="original">Original Format</option>
+            <option value="image/jpeg">JPG / JPEG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp" selected>WEBP (Recommended for Web)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- COMPRESS IMAGE NOW BUTTON -->
+      <div style="margin-top: 1.5rem;">
+        <button type="button" id="compressNowBtn" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: var(--glow-shadow);">
+          ⚡ COMPRESS IMAGE NOW
+        </button>
+      </div>
+    </div>
+
+    <!-- 5. PROCESSING CONTAINER -->
+    <div id="compressorProcessing" class="compressor-card" style="display: none; text-align: center; padding: 2rem;">
+      <span class="status-badge-info" style="font-size: 1rem; padding: 0.5rem 1.25rem;">⚡ Processing... Please wait</span>
+      <p style="color: var(--text-muted); margin-top: 0.75rem; font-size: 0.95rem;">Compressing image using Canvas API...</p>
+    </div>
+
+    <!-- 6. RESULT CONTAINER -->
+    <div id="compressorResult" class="compressor-card" style="display: none; background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.3);">
+      <div style="margin-bottom: 1.25rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+        <span style="color: var(--success); font-size: 1.25rem; font-weight: 800;">✓ Compression Complete</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; align-items: center;">
+        <!-- COMPRESSED PREVIEW -->
+        <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 12px; border: 1px solid var(--success-bg);">
+          <small style="color: var(--success); font-weight: 700; display: block; margin-bottom: 0.4rem;">COMPRESSED PREVIEW</small>
+          <img id="resultImagePreview" src="" alt="Compressed Preview" style="max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 6px;">
+        </div>
+
+        <!-- METRICS & BUTTONS -->
+        <div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
+            <div class="card" style="text-align: center; padding: 0.75rem; background: var(--input-bg);">
+              <small style="color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Original</small>
+              <div id="resultOrigSize" style="font-size: 1rem; font-weight: 700; margin-top: 0.2rem;">0 MB</div>
+            </div>
+
+            <div class="card" style="text-align: center; padding: 0.75rem; background: var(--success-bg); border-color: var(--success);">
+              <small style="color: var(--success); font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Compressed</small>
+              <div id="resultCompSize" style="font-size: 1rem; font-weight: 800; color: var(--success); margin-top: 0.2rem;">0 KB</div>
+            </div>
+
+            <div class="card" style="text-align: center; padding: 0.75rem; background: var(--accent-glow); border-color: var(--primary);">
+              <small style="color: var(--primary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Saved</small>
+              <div id="resultSavings" style="font-size: 1rem; font-weight: 800; color: var(--primary); margin-top: 0.2rem;">0%</div>
+            </div>
+
+            <div class="card" style="text-align: center; padding: 0.75rem; background: var(--input-bg);">
+              <small style="color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Format</small>
+              <div id="resultFormat" style="font-size: 1rem; font-weight: 800; color: var(--text-main); margin-top: 0.2rem;">WEBP</div>
+            </div>
+          </div>
+
+          <!-- DOWNLOAD & RESET BUTTONS -->
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a id="downloadCompressedBtn" href="#" download="compressed.webp" class="btn btn-primary" style="flex: 2; padding: 0.9rem; font-size: 1.1rem; font-weight: 800; background: linear-gradient(135deg, var(--success) 0%, #059669 100%); border: none; text-decoration: none; text-align: center;">
+              ⬇ DOWNLOAD COMPRESSED IMAGE
+            </a>
+            <button type="button" id="processAnotherBtn" class="btn btn-secondary" style="flex: 1; padding: 0.9rem;">
+              ↻ PROCESS ANOTHER IMAGE
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. ERROR CONTAINER -->
+    <div id="compressorError" class="compressor-card" style="display: none; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.4); text-align: center; padding: 2rem;">
+      <span class="status-badge-error" style="font-size: 1.1rem;">✕ Error Processing File</span>
+      <p id="errorMessageText" style="color: var(--text-main); margin-top: 0.75rem;">Unable to process selected file. Please select a valid JPG, PNG, or WEBP image.</p>
+      <button type="button" id="errorResetBtn" class="btn btn-secondary" style="margin-top: 1rem;">Try Another Image</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- DIRECT SELF-CONTAINED JAVASCRIPT STATE CONTROLLER -->
+<script>
+(function() {
+  function initCompressorController() {
+    console.log("[Sanix Compressor] State controller initializing...");
+
+    // DOM Section Containers
+    const compressorDropzone = document.getElementById('compressorDropzone');
+    const compressorReading = document.getElementById('compressorReading');
+    const compressorReady = document.getElementById('compressorReady');
+    const compressorOptions = document.getElementById('compressorOptions');
+    const compressorProcessing = document.getElementById('compressorProcessing');
+    const compressorResult = document.getElementById('compressorResult');
+    const compressorError = document.getElementById('compressorError');
+
+    // Controls & Buttons
+    const compressorFileInput = document.getElementById('compressorFileInput');
+    const chooseImageBtn = document.getElementById('chooseImageBtn');
+    const changeImageBtn = document.getElementById('changeImageBtn');
+    const proceedCompressBtn = document.getElementById('proceedCompressBtn');
+
+    const compressQuality = document.getElementById('compressQuality');
+    const compressQualityValue = document.getElementById('compressQualityValue');
+    const compressFormat = document.getElementById('compressFormat');
+    const compressNowBtn = document.getElementById('compressNowBtn');
+
+    const downloadCompressedBtn = document.getElementById('downloadCompressedBtn');
+    const processAnotherBtn = document.getElementById('processAnotherBtn');
+    const errorResetBtn = document.getElementById('errorResetBtn');
+
+    // Display Text & Image Elements
+    const readingFileName = document.getElementById('readingFileName');
+    const readingFileSize = document.getElementById('readingFileSize');
+    const readingProgressFill = document.getElementById('readingProgressFill');
+    const readingPercentText = document.getElementById('readingPercentText');
+
+    const readyImagePreview = document.getElementById('readyImagePreview');
+    const readyFileName = document.getElementById('readyFileName');
+    const readyFileSize = document.getElementById('readyFileSize');
+    const readyDimensions = document.getElementById('readyDimensions');
+
+    const resultImagePreview = document.getElementById('resultImagePreview');
+    const resultOrigSize = document.getElementById('resultOrigSize');
+    const resultCompSize = document.getElementById('resultCompSize');
+    const resultSavings = document.getElementById('resultSavings');
+    const resultFormat = document.getElementById('resultFormat');
+    const errorMessageText = document.getElementById('errorMessageText');
+
+    // State Variables
+    let activeFile = null;
+    let objectUrl = null;
+    let compressedBlobUrl = null;
+    let progressTimer = null;
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function isImageFile(file) {
+      if (!file) return false;
+      if (file.type && file.type.startsWith('image/')) return true;
+      const name = (file.name || '').toLowerCase();
+      return name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.webp') || name.endsWith('.gif') || name.endsWith('.bmp');
+    }
+
+    function showState(targetSection) {
+      compressorDropzone.style.display = 'none';
+      compressorReading.style.display = 'none';
+      compressorReady.style.display = 'none';
+      compressorOptions.style.display = 'none';
+      compressorProcessing.style.display = 'none';
+      compressorResult.style.display = 'none';
+      compressorError.style.display = 'none';
+
+      if (targetSection) targetSection.style.display = 'block';
+    }
+
+    function resetAllState() {
+      console.log("[Sanix Compressor] Resetting to Step 1: DROPZONE");
+      compressorFileInput.value = '';
+      activeFile = null;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+      if (compressedBlobUrl) {
+        URL.revokeObjectURL(compressedBlobUrl);
+        compressedBlobUrl = null;
+      }
+      if (progressTimer) clearInterval(progressTimer);
+
+      showState(compressorDropzone);
+    }
+
+    function showError(msg) {
+      errorMessageText.textContent = msg || "Unable to read this image file. Please try another file.";
+      showState(compressorError);
+    }
+
+    function handleCompressorFile(file) {
+      if (!isImageFile(file)) {
+        showError("Invalid file type. Please select a valid JPG, PNG, or WEBP image.");
+        return;
+      }
+
+      console.log("[Sanix Compressor] File selected:", file.name, file.size, file.type);
+      activeFile = file;
+
+      // STEP 2: Show READING FILE State
+      readingFileName.textContent = file.name;
+      readingFileSize.textContent = formatBytes(file.size);
+      showState(compressorReading);
+
+      let progress = 0;
+      readingProgressFill.style.width = '0%';
+      readingPercentText.textContent = '0%';
+
+      if (progressTimer) clearInterval(progressTimer);
+
+      progressTimer = setInterval(function() {
+        progress += Math.floor(Math.random() * 25) + 20;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(progressTimer);
+          finishFileReading(file);
+        }
+        readingProgressFill.style.width = progress + '%';
+        readingPercentText.textContent = progress + '%';
+      }, 30);
+    }
+    window.handleCompressorFile = handleCompressorFile;
+
+    function finishFileReading(file) {
+      console.log("[Sanix Compressor] File reading complete. Moving to Step 3: FILE READY");
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(file);
+
+      readyImagePreview.src = objectUrl;
+      readyFileName.textContent = file.name;
+      readyFileSize.textContent = formatBytes(file.size);
+      readyDimensions.textContent = "Calculating...";
+
+      // STEP 3: Visibly show #compressorReady and [ ➜ PROCEED TO COMPRESS ] button
+      showState(compressorReady);
+
+      // Load Image Dimensions
+      const img = new Image();
+      img.onload = function() {
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        readyDimensions.textContent = w + " × " + h + " px";
+      };
+      img.onerror = function() {
+        readyDimensions.textContent = "Dimensions unavailable";
+      };
+      img.src = objectUrl;
+
+      if (window.Sani && typeof window.Sani.say === 'function') {
+        window.Sani.say("File ready! Click Proceed to adjust compression settings.", "happy");
+      }
+    }
+
+    // 1. Direct File Input Change Listener
+    compressorFileInput.addEventListener('change', function(e) {
+      if (e.target.files && e.target.files.length > 0) {
+        handleCompressorFile(e.target.files[0]);
+      }
+    });
+
+    // 2. Click Handlers for Choose Image & Dropzone
+    chooseImageBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      compressorFileInput.click();
+    });
+
+    compressorDropzone.addEventListener('click', function(e) {
+      if (e.target !== compressorFileInput && e.target !== chooseImageBtn) {
+        compressorFileInput.click();
+      }
+    });
+
+    // Drag and Drop
+    compressorDropzone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      compressorDropzone.classList.add('dragover');
+    });
+    compressorDropzone.addEventListener('dragleave', function() {
+      compressorDropzone.classList.remove('dragover');
+    });
+    compressorDropzone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      compressorDropzone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleCompressorFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // 3. STEP 3 -> STEP 4: PROCEED BUTTON CLICK
+    proceedCompressBtn.addEventListener('click', function() {
+      console.log("[Sanix Compressor] Proceed button clicked! Revealing Step 4: OPTIONS");
+      compressorReady.style.display = 'block'; // Keep details visible
+      compressorOptions.style.display = 'block'; // Show options panel
+      compressorOptions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (window.Sani && typeof window.Sani.say === 'function') {
+        window.Sani.say("Set quality level and click Compress Image Now.", "info");
+      }
+    });
+
+    // 4. Quality Slider Input Listener
+    compressQuality.addEventListener('input', function() {
+      compressQualityValue.textContent = compressQuality.value + '%';
+    });
+
+    // 5. STEP 4 -> STEP 5 & 6: COMPRESS NOW BUTTON CLICK
+    compressNowBtn.addEventListener('click', function() {
+      if (!activeFile || !objectUrl) {
+        alert("Please select an image file first.");
+        return;
+      }
+
+      console.log("[Sanix Compressor] Compress Now clicked. Running Canvas compression...");
+      compressNowBtn.disabled = true;
+      compressorProcessing.style.display = 'block';
+
+      setTimeout(function() {
+        const img = new Image();
+        img.onload = function() {
+          try {
+            const canvas = document.createElement('canvas');
+            const w = img.naturalWidth || img.width;
+            const h = img.naturalHeight || img.height;
+            canvas.width = w;
+            canvas.height = h;
+
+            const ctx = canvas.getContext('2d');
+            let selectedMime = compressFormat.value;
+
+            if (selectedMime === 'original') {
+              selectedMime = activeFile.type;
+              if (!selectedMime || selectedMime === '') {
+                const ext = (activeFile.name || '').split('.').pop().toLowerCase();
+                if (ext === 'png') selectedMime = 'image/png';
+                else if (ext === 'webp') selectedMime = 'image/webp';
+                else selectedMime = 'image/jpeg';
+              }
+            }
+
+            if (selectedMime === 'image/jpeg') {
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, w, h);
+            }
+            ctx.drawImage(img, 0, 0, w, h);
+
+            const qualityVal = parseFloat(compressQuality.value) / 100;
+
+            canvas.toBlob(function(blob) {
+              compressNowBtn.disabled = false;
+              compressorProcessing.style.display = 'none';
+
+              if (!blob) {
+                showError("Canvas failed to generate compressed image blob.");
+                return;
+              }
+
+              console.log("[Sanix Compressor] Compression generated real blob size:", blob.size);
+
+              if (compressedBlobUrl) URL.revokeObjectURL(compressedBlobUrl);
+              compressedBlobUrl = URL.createObjectURL(blob);
+
+              resultImagePreview.src = compressedBlobUrl;
+              resultOrigSize.textContent = formatBytes(activeFile.size);
+              resultCompSize.textContent = formatBytes(blob.size);
+
+              const savedBytes = activeFile.size - blob.size;
+              const savedPercent = Math.max(0, Math.round((savedBytes / activeFile.size) * 100));
+              resultSavings.textContent = savedPercent + '%';
+
+              let ext = 'webp';
+              if (selectedMime.includes('png')) ext = 'png';
+              else if (selectedMime.includes('jpeg') || selectedMime.includes('jpg')) ext = 'jpg';
+              resultFormat.textContent = ext.toUpperCase();
+
+              const baseName = activeFile.name.substring(0, activeFile.name.lastIndexOf('.')) || 'compressed-image';
+              downloadCompressedBtn.href = compressedBlobUrl;
+              downloadCompressedBtn.download = baseName + '-compressed.' + ext;
+
+              // STEP 6: Show RESULT
+              compressorResult.style.display = 'block';
+              compressorResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+              if (window.showToast) window.showToast("Compression complete! Saved " + savedPercent + "%", "success");
+              if (window.Sani && typeof window.Sani.say === 'function') {
+                window.Sani.say("Compression complete! Saved " + savedPercent + "% file size.", "success");
+              }
+            }, selectedMime, qualityVal);
+
+          } catch (err) {
+            compressNowBtn.disabled = false;
+            compressorProcessing.style.display = 'none';
+            showError("Compression error: " + err.message);
+          }
+        };
+        img.onerror = function() {
+          compressNowBtn.disabled = false;
+          compressorProcessing.style.display = 'none';
+          showError("Unable to load source image into Canvas.");
+        };
+        img.src = objectUrl;
+      }, 150);
+    });
+
+    // Reset Buttons
+    changeImageBtn.addEventListener('click', resetAllState);
+    processAnotherBtn.addEventListener('click', resetAllState);
+    errorResetBtn.addEventListener('click', resetAllState);
+
+    // Initial state set
+    resetAllState();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCompressorController);
+  } else {
+    initCompressorController();
+  }
+})();
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

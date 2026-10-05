@@ -1,0 +1,14 @@
+# Disable Script Execution in Temp Directory
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|cgi|asp|js)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>

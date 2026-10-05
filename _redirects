@@ -1,0 +1,49 @@
+# SANIX TOOL - Netlify _redirects Rules (Force 200 Rewrite for Pretty URLs)
+
+/tools/image/compressor   /tools/image/compressor.html   200!
+/tools/image/resizer      /tools/image/resizer.html      200!
+/tools/image/bg-remover   /tools/image/bg-remover.html   200!
+/tools/image/id-photo     /tools/image/id-photo.html     200!
+/tools/image/passport-photo /tools/image/passport-photo.html 200!
+/tools/image/image-to-pdf /tools/image/image-to-pdf.html 200!
+/tools/image/cropper     /tools/image/cropper.html     200!
+/tools/image/converter   /tools/image/converter.html   200!
+/tools/image/rotator     /tools/image/rotator.html     200!
+
+/tools/pdf/merger        /tools/pdf/merger.html        200!
+/tools/pdf/splitter      /tools/pdf/splitter.html      200!
+/tools/pdf/rotator       /tools/pdf/rotator.html       200!
+/tools/pdf/metadata      /tools/pdf/metadata.html      200!
+
+/tools/text/counter      /tools/text/counter.html      200!
+/tools/text/case-converter /tools/text/case-converter.html 200!
+/tools/text/line-tools   /tools/text/line-tools.html   200!
+/tools/text/cleaner      /tools/text/cleaner.html      200!
+/tools/text/slug-generator /tools/text/slug-generator.html 200!
+/tools/text/lorem-ipsum  /tools/text/lorem-ipsum.html  200!
+
+/tools/developer/json    /tools/developer/json.html    200!
+/tools/developer/base64  /tools/developer/base64.html  200!
+/tools/developer/url     /tools/developer/url.html     200!
+/tools/developer/uuid    /tools/developer/uuid.html    200!
+/tools/developer/hash    /tools/developer/hash.html    200!
+/tools/developer/timestamp /tools/developer/timestamp.html 200!
+/tools/developer/color   /tools/developer/color.html   200!
+/tools/developer/regex   /tools/developer/regex.html   200!
+
+/tools/calculator/basic  /tools/calculator/basic.html  200!
+/tools/calculator/percentage /tools/calculator/percentage.html 200!
+/tools/calculator/age    /tools/calculator/age.html    200!
+/tools/calculator/emi    /tools/calculator/emi.html    200!
+/tools/calculator/unit   /tools/calculator/unit.html   200!
+
+/tools/file/info         /tools/file/info.html         200!
+/tools/file/zip          /tools/file/zip.html          200!
+/tools/file/hash         /tools/file/hash.html         200!
+
+/tools                   /tools.html                   200!
+/favorites               /favorites.html               200!
+/about                   /about.html                   200!
+/contact                 /contact.html                 200!
+/privacy                 /privacy.html                 200!
+/terms                   /terms.html                   200!

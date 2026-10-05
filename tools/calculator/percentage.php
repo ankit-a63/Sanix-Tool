@@ -1,0 +1,73 @@
+<?php
+$pageTitle = "Percentage Calculator - Sanix Tool";
+$pageDesc = "Calculate percentage values, percentage change, increase/decrease and fractions.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="tool-workspace">
+    <div class="tool-header">
+      <div class="tool-header-info">
+        <div class="tool-icon">percent</div>
+        <div>
+          <h1 class="tool-header-title">Percentage Calculator</h1>
+          <p class="tool-header-desc">Calculate percentage of numbers and percentage changes.</p>
+        </div>
+      </div>
+      <button class="fav-btn" data-tool="percentage-calculator" title="Favorite this tool">🤍</button>
+    </div>
+
+    <!-- CALCULATOR 1: What is X% of Y? -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h4>What is <span style="color:var(--primary);">X%</span> of <span style="color:var(--primary);">Y</span>?</h4>
+      <div class="tool-controls-grid" style="margin-top:1rem;">
+        <input type="number" id="p1-x" class="form-control" placeholder="X (e.g. 15)">
+        <input type="number" id="p1-y" class="form-control" placeholder="Y (e.g. 200)">
+      </div>
+      <div style="margin-top:1rem; font-weight:700; font-size:1.1rem; color:var(--success);">Result: <span id="p1-res">0</span></div>
+    </div>
+
+    <!-- CALCULATOR 2: X is what % of Y? -->
+    <div class="card">
+      <h4><span style="color:var(--primary);">X</span> is what % of <span style="color:var(--primary);">Y</span>?</h4>
+      <div class="tool-controls-grid" style="margin-top:1rem;">
+        <input type="number" id="p2-x" class="form-control" placeholder="X (e.g. 30)">
+        <input type="number" id="p2-y" class="form-control" placeholder="Y (e.g. 150)">
+      </div>
+      <div style="margin-top:1rem; font-weight:700; font-size:1.1rem; color:var(--success);">Result: <span id="p2-res">0%</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  trackToolUsage('percentage-calculator');
+
+  const p1x = document.getElementById('p1-x');
+  const p1y = document.getElementById('p1-y');
+  const p1res = document.getElementById('p1-res');
+
+  function calcP1() {
+    const x = parseFloat(p1x.value) || 0;
+    const y = parseFloat(p1y.value) || 0;
+    p1res.textContent = ((x / 100) * y).toLocaleString();
+  }
+  p1x.addEventListener('input', calcP1);
+  p1y.addEventListener('input', calcP1);
+
+  const p2x = document.getElementById('p2-x');
+  const p2y = document.getElementById('p2-y');
+  const p2res = document.getElementById('p2-res');
+
+  function calcP2() {
+    const x = parseFloat(p2x.value) || 0;
+    const y = parseFloat(p2y.value) || 0;
+    if (y === 0) { p2res.textContent = '0%'; return; }
+    p2res.textContent = `${((x / y) * 100).toFixed(2)}%`;
+  }
+  p2x.addEventListener('input', calcP2);
+  p2y.addEventListener('input', calcP2);
+});
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

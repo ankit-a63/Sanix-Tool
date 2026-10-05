@@ -1,0 +1,22 @@
+# SANIX TOOL - Production Apache Configuration
+
+Options -Indexes +FollowSymLinks
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Prevent direct browser access to sensitive folders
+    RewriteRule ^(config|database|includes|temp|scratch)/ - [F,L]
+
+    # Block access to hidden/sensitive environment, schema and documentation files
+    RewriteRule \.(env|env\.example|md|sql|bat|log|jsonl)$ - [F,L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>

@@ -1,0 +1,79 @@
+<?php
+$pageTitle = "Unix Timestamp Converter - Sanix Tool";
+$pageDesc = "Convert Epoch Unix timestamps in seconds or milliseconds to human-readable UTC and local date formats.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="tool-workspace">
+    <div class="tool-header">
+      <div class="tool-header-info">
+        <div class="tool-icon">⏰</div>
+        <div>
+          <h1 class="tool-header-title">Unix Timestamp Converter</h1>
+          <p class="tool-header-desc">Convert Unix epoch timestamps to UTC/Local human dates and vice versa.</p>
+        </div>
+      </div>
+      <button class="fav-btn" data-tool="timestamp-converter" title="Favorite this tool">🤍</button>
+    </div>
+
+    <!-- CURRENT TIMESTAMP BADGE -->
+    <div class="card" style="margin-bottom: 1.5rem; text-align:center;">
+      <small style="color:var(--text-muted);">Current Unix Timestamp</small>
+      <h2 id="current-epoch" style="color:var(--primary); font-family:monospace; margin-top:0.25rem;">-</h2>
+    </div>
+
+    <div class="tool-controls-grid">
+      <div class="form-group">
+        <label class="form-label">Unix Timestamp (Seconds or Milliseconds)</label>
+        <input type="number" id="ts-input" class="form-control" placeholder="e.g. 1700000000">
+      </div>
+
+      <div class="form-group" style="display:flex; align-items:flex-end;">
+        <button class="btn btn-primary" id="btn-ts-convert" style="width:100%;">⚡ Convert to Date</button>
+      </div>
+    </div>
+
+    <div class="tool-result-box">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem;">
+        <div class="card"><small style="color:var(--text-muted);">Local Timezone</small><h4 id="res-local" style="margin-top:0.25rem;">-</h4></div>
+        <div class="card"><small style="color:var(--text-muted);">UTC Time</small><h4 id="res-utc" style="margin-top:0.25rem;">-</h4></div>
+        <div class="card"><small style="color:var(--text-muted);">ISO 8601 String</small><h4 id="res-iso" style="margin-top:0.25rem; font-size:0.95rem;">-</h4></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  trackToolUsage('timestamp-converter');
+
+  const currentEpochSpan = document.getElementById('current-epoch');
+  const tsInput = document.getElementById('ts-input');
+
+  function updateLiveClock() {
+    const sec = Math.floor(Date.now() / 1000);
+    currentEpochSpan.textContent = sec;
+  }
+  setInterval(updateLiveClock, 1000);
+  updateLiveClock();
+
+  function convertTS() {
+    let val = parseInt(tsInput.value);
+    if (isNaN(val)) return;
+
+    // Check if seconds or milliseconds
+    if (val < 100000000000) val = val * 1000;
+
+    const date = new Date(val);
+    document.getElementById('res-local').textContent = date.toLocaleString();
+    document.getElementById('res-utc').textContent = date.toUTCString();
+    document.getElementById('res-iso').textContent = date.toISOString();
+  }
+
+  document.getElementById('btn-ts-convert').addEventListener('click', convertTS);
+  tsInput.addEventListener('input', convertTS);
+});
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

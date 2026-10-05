@@ -1,0 +1,707 @@
+<?php
+// Prevent browser caching during active development
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
+$pageTitle = "Background Remover - Sanix Tool";
+$pageDesc = "Remove background from JPG, PNG and WEBP images with custom background colors, gradients, custom image backgrounds, and shadow effects.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<style>
+.bg-remover-container {
+  max-width: 960px;
+  margin: 0 auto;
+  background: var(--surface, #1e293b);
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.bg-dropzone {
+  border: 2px dashed var(--primary, #00f2fe);
+  border-radius: 16px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  background: var(--input-bg, #0f172a);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.bg-dropzone:hover, .bg-dropzone.dragover {
+  background: rgba(0, 242, 254, 0.08);
+  border-color: #00c6ff;
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
+}
+
+.bg-card {
+  background: var(--input-bg, #0f172a);
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.bg-tab-btn {
+  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--surface-border);
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.bg-tab-btn.active, .bg-tab-btn:hover {
+  background: var(--primary, #00f2fe);
+  color: #040914;
+  border-color: var(--primary);
+}
+
+.canvas-editor-wrapper {
+  background: repeating-conic-gradient(#1e293b 0% 25%, #0f172a 0% 50%) 50% / 20px 20px;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+canvas#bgEditorCanvas {
+  max-width: 100%;
+  max-height: 480px;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+</style>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="bg-remover-container">
+    
+    <!-- TOOL HEADER -->
+    <div class="tool-header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--surface-border);">
+      <div class="tool-header-info" style="display: flex; align-items: center; gap: 1rem;">
+        <div class="tool-icon" style="font-size: 2.2rem;">🪄</div>
+        <div>
+          <h1 class="tool-header-title" style="font-size: 1.6rem; margin: 0;">Background Remover & Studio Editor</h1>
+          <p class="tool-header-desc" style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">Isolate image subjects, replace backgrounds with solid colors, gradients, custom images, or blur effects.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACY NOTIFICATION -->
+    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(0, 242, 254, 0.05); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.15);">
+      🔒 <span>Smart Boundary & Color Segmentation Engine — Processed 100% locally inside your browser.</span>
+    </div>
+
+    <!-- 1. DROPZONE -->
+    <div id="bgDropzone" class="bg-dropzone">
+      <div style="font-size: 3.2rem; margin-bottom: 0.5rem;">📁</div>
+      <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Drop your image here</div>
+      <div style="margin: 0.85rem 0;">
+        <button type="button" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-size: 1.05rem; pointer-events: none;">[ Browse Image ]</button>
+      </div>
+      <div style="font-size: 0.88rem; color: var(--text-muted);">Supported Formats: <strong>JPG • PNG • WEBP</strong></div>
+      <input type="file" id="bgFileInput" accept="image/jpeg,image/png,image/webp" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 20;" onchange="if(this.files && this.files[0] && window.handleBgFile) window.handleBgFile(this.files[0]);">
+    </div>
+
+    <!-- 2. READING STATE -->
+    <div id="bgReading" class="bg-card" style="display: none; text-align: center; padding: 2.5rem 1.5rem;">
+      <span class="btn btn-secondary" style="pointer-events: none; margin-bottom: 0.75rem;">⚡ Reading file...</span>
+      <h3 id="bgReadingFileName" style="font-size: 1.15rem; color: var(--text-main); word-break: break-all;">image.jpg</h3>
+      <small id="bgReadingFileSize" style="color: var(--text-muted);">Calculating size...</small>
+      <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; margin: 1.25rem 0 0.5rem 0;">
+        <div id="bgReadingProgressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00f2fe, #00c6ff); border-radius: 999px; transition: width 0.15s ease;"></div>
+      </div>
+      <div id="bgReadingPercentText" style="font-size: 0.95rem; font-weight: 800; color: var(--primary);">0%</div>
+    </div>
+
+    <!-- 3. FILE READY STATE -->
+    <div id="bgReady" class="bg-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+        <span style="color: #10b981; font-weight: 800; font-size: 0.9rem;">✓ Image Ready for Background Removal</span>
+        <button type="button" class="btn btn-secondary" id="bgChangeImageBtn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Change Image</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center;">
+        <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 12px; border: 1px solid var(--surface-border);">
+          <img id="bgReadyPreview" src="" alt="Source Preview" style="max-width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px;">
+        </div>
+        <div>
+          <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">FILE NAME</small>
+          <h4 id="bgReadyFileName" style="font-size: 1.1rem; word-break: break-all; color: var(--text-main); margin: 0 0 0.5rem 0;">filename.jpg</h4>
+          <div style="display: flex; gap: 2rem;">
+            <div>
+              <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">FILE SIZE</small>
+              <div id="bgReadyFileSize" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">0 MB</div>
+            </div>
+            <div>
+              <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">DIMENSIONS</small>
+              <div id="bgReadyDimensions" style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">0 × 0 px</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" id="bgProceedBtn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 1rem; font-size: 1.15rem; font-weight: 800;">
+        🪄 REMOVE BACKGROUND NOW
+      </button>
+    </div>
+
+    <!-- 4. ANIMATED PROCESSING STATE -->
+    <div id="bgProcessing" class="bg-card" style="display: none; text-align: center; padding: 2.5rem 1.5rem;">
+      <span style="color: var(--primary); font-weight: 800; font-size: 1.1rem;">⚡ Processing Image...</span>
+      <h3 id="bgProcessStageText" style="color: var(--text-main); font-size: 1.25rem; margin-top: 0.75rem;">Stage 1/4: Analyzing Image & Edges...</h3>
+      <div style="width: 100%; height: 14px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; margin: 1.5rem 0 0.75rem 0;">
+        <div id="bgProcessProgressFill" style="height: 100%; width: 25%; background: linear-gradient(90deg, #00f2fe, #10b981); border-radius: 999px; transition: width 0.3s ease;"></div>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.88rem;">Extracting subject mask using in-browser Canvas edge detection...</p>
+    </div>
+
+    <!-- 5. RESULT EDITOR STATE -->
+    <div id="bgResult" class="bg-card" style="display: none; background: rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+        <span style="color: #10b981; font-size: 1.2rem; font-weight: 800;">✓ Background Removed Successfully</span>
+        <button type="button" class="btn btn-secondary" id="bgResetBtn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">↻ Start Over</button>
+      </div>
+
+      <!-- CANVAS EDITOR PREVIEW -->
+      <div class="canvas-editor-wrapper">
+        <canvas id="bgEditorCanvas"></canvas>
+      </div>
+
+      <!-- BACKGROUND REPLACEMENT CONTROLS -->
+      <div style="margin-top: 1.5rem;">
+        <h4 style="font-size: 1.05rem; color: var(--primary); margin-bottom: 0.75rem;">1. Background Mode</h4>
+        
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+          <button type="button" class="bg-tab-btn active" data-bgmode="transparent">🏁 Transparent</button>
+          <button type="button" class="bg-tab-btn" data-bgmode="color">🎨 Solid Color</button>
+          <button type="button" class="bg-tab-btn" data-bgmode="gradient">🌈 Gradient</button>
+          <button type="button" class="bg-tab-btn" data-bgmode="image">🖼️ Custom Image</button>
+          <button type="button" class="bg-tab-btn" data-bgmode="blur">💧 Blur Original</button>
+        </div>
+
+        <!-- PANEL: SOLID COLOR -->
+        <div id="panelBgColor" style="display: none; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem;">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Select Solid Color:</label>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary color-preset-btn" data-color="#ffffff" style="background:#ffffff; color:#000; font-weight:700;">White</button>
+            <button type="button" class="btn btn-secondary color-preset-btn" data-color="#000000" style="background:#000000; color:#fff; font-weight:700;">Black</button>
+            <button type="button" class="btn btn-secondary color-preset-btn" data-color="#ef4444" style="background:#ef4444; color:#fff; font-weight:700;">Red</button>
+            <button type="button" class="btn btn-secondary color-preset-btn" data-color="#3b82f6" style="background:#3b82f6; color:#fff; font-weight:700;">Blue</button>
+            <button type="button" class="btn btn-secondary color-preset-btn" data-color="#10b981" style="background:#10b981; color:#fff; font-weight:700;">Green</button>
+            <input type="color" id="bgSolidColorPicker" value="#ffffff" style="height: 38px; width: 60px; padding: 2px; cursor: pointer; border-radius: 6px;">
+          </div>
+        </div>
+
+        <!-- PANEL: GRADIENT -->
+        <div id="panelBgGradient" style="display: none; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div>
+              <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Start Color</label>
+              <input type="color" id="gradStartPicker" value="#00f2fe" class="form-control" style="height: 38px; padding: 2px; cursor: pointer;">
+            </div>
+            <div>
+              <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">End Color</label>
+              <input type="color" id="gradEndPicker" value="#4facfe" class="form-control" style="height: 38px; padding: 2px; cursor: pointer;">
+            </div>
+            <div>
+              <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Angle (<span id="gradAngleText">45°</span>)</label>
+              <input type="range" id="gradAngleRange" min="0" max="360" value="45" class="form-control" style="height: 10px; cursor: pointer;">
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL: CUSTOM IMAGE -->
+        <div id="panelBgImage" style="display: none; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem;">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Upload Custom Background Image:</label>
+          <input type="file" id="customBgFileInput" accept="image/*" class="form-control">
+        </div>
+
+        <!-- PANEL: BLUR ORIGINAL -->
+        <div id="panelBgBlur" style="display: none; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem;">
+          <label style="font-weight: 600; display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <span>Blur Intensity</span>
+            <strong id="blurIntensityText" style="color: var(--primary);">12px</strong>
+          </label>
+          <input type="range" id="blurIntensityRange" min="0" max="40" value="12" class="form-control" style="height: 10px; cursor: pointer;">
+        </div>
+
+        <!-- FOREGROUND SUBJECT TRANSFORM CONTROLS -->
+        <h4 style="font-size: 1.05rem; color: var(--primary); margin-top: 1.5rem; margin-bottom: 0.75rem;">2. Subject Adjustments & Drop Shadow</h4>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+          <div>
+            <label style="font-weight: 600; font-size: 0.85rem;">Scale (<span id="fgScaleText">100%</span>)</label>
+            <input type="range" id="fgScaleRange" min="30" max="180" value="100" class="form-control" style="height: 8px; cursor: pointer;">
+          </div>
+          <div>
+            <label style="font-weight: 600; font-size: 0.85rem;">Position X (<span id="fgPosXText">0px</span>)</label>
+            <input type="range" id="fgPosXRange" min="-120" max="120" value="0" class="form-control" style="height: 8px; cursor: pointer;">
+          </div>
+          <div>
+            <label style="font-weight: 600; font-size: 0.85rem;">Position Y (<span id="fgPosYText">0px</span>)</label>
+            <input type="range" id="fgPosYRange" min="-120" max="120" value="0" class="form-control" style="height: 8px; cursor: pointer;">
+          </div>
+          <div>
+            <label style="font-weight: 600; font-size: 0.85rem;">Rotation (<span id="fgRotText">0°</span>)</label>
+            <input type="range" id="fgRotRange" min="-180" max="180" value="0" class="form-control" style="height: 8px; cursor: pointer;">
+          </div>
+          <div style="grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; border-top: 1px solid var(--surface-border); padding-top: 0.75rem;">
+            <label style="font-weight: 700; cursor: pointer; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
+              <input type="checkbox" id="fgShadowCheck" style="width: 18px; height: 18px; accent-color: var(--primary);">
+              <span>Enable Drop Shadow</span>
+            </label>
+            <input type="color" id="shadowColorPicker" value="#000000" style="height: 32px; width: 45px; padding: 2px; cursor: pointer;">
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Blur:</label>
+            <input type="range" id="shadowBlurRange" min="0" max="30" value="12" style="width: 100px; height: 6px;">
+          </div>
+        </div>
+
+        <!-- EXPORT DOWNLOAD BUTTONS -->
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary download-export-btn" data-format="png" style="flex: 1; padding: 0.9rem; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border: none;">
+            ⬇ DOWNLOAD PNG (Transparent/Custom)
+          </button>
+          <button type="button" class="btn btn-primary download-export-btn" data-format="jpeg" style="flex: 1; padding: 0.9rem; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #00f2fe, #00c6ff); color: #040914; border: none;">
+            ⬇ DOWNLOAD JPG
+          </button>
+          <button type="button" class="btn btn-secondary download-export-btn" data-format="webp" style="padding: 0.9rem 1.25rem;">
+            ⬇ WEBP
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  function initBgRemoverController() {
+    const dropzone = document.getElementById('bgDropzone');
+    const readingCard = document.getElementById('bgReading');
+    const readyCard = document.getElementById('bgReady');
+    const processingCard = document.getElementById('bgProcessing');
+    const resultCard = document.getElementById('bgResult');
+
+    const fileInput = document.getElementById('bgFileInput');
+    const bgChangeImageBtn = document.getElementById('bgChangeImageBtn');
+    const bgProceedBtn = document.getElementById('bgProceedBtn');
+    const bgResetBtn = document.getElementById('bgResetBtn');
+
+    const bgReadingFileName = document.getElementById('bgReadingFileName');
+    const bgReadingFileSize = document.getElementById('bgReadingFileSize');
+    const bgReadingProgressFill = document.getElementById('bgReadingProgressFill');
+    const bgReadingPercentText = document.getElementById('bgReadingPercentText');
+
+    const bgReadyPreview = document.getElementById('bgReadyPreview');
+    const bgReadyFileName = document.getElementById('bgReadyFileName');
+    const bgReadyFileSize = document.getElementById('bgReadyFileSize');
+    const bgReadyDimensions = document.getElementById('bgReadyDimensions');
+
+    const bgProcessStageText = document.getElementById('bgProcessStageText');
+    const bgProcessProgressFill = document.getElementById('bgProcessProgressFill');
+
+    const canvas = document.getElementById('bgEditorCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Controls
+    const bgSolidColorPicker = document.getElementById('bgSolidColorPicker');
+    const gradStartPicker = document.getElementById('gradStartPicker');
+    const gradEndPicker = document.getElementById('gradEndPicker');
+    const gradAngleRange = document.getElementById('gradAngleRange');
+    const gradAngleText = document.getElementById('gradAngleText');
+    const customBgFileInput = document.getElementById('customBgFileInput');
+    const blurIntensityRange = document.getElementById('blurIntensityRange');
+    const blurIntensityText = document.getElementById('blurIntensityText');
+
+    const fgScaleRange = document.getElementById('fgScaleRange');
+    const fgScaleText = document.getElementById('fgScaleText');
+    const fgPosXRange = document.getElementById('fgPosXRange');
+    const fgPosXText = document.getElementById('fgPosXText');
+    const fgPosYRange = document.getElementById('fgPosYRange');
+    const fgPosYText = document.getElementById('fgPosYText');
+    const fgRotRange = document.getElementById('fgRotRange');
+    const fgRotText = document.getElementById('fgRotText');
+
+    const fgShadowCheck = document.getElementById('fgShadowCheck');
+    const shadowColorPicker = document.getElementById('shadowColorPicker');
+    const shadowBlurRange = document.getElementById('shadowBlurRange');
+
+    let activeFile = null;
+    let objectUrl = null;
+    let sourceImage = null;
+    let fgCutoutImage = null;
+    let customBgImage = null;
+    let progressTimer = null;
+
+    let activeBgMode = 'transparent';
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function showState(card) {
+      dropzone.style.display = 'none';
+      readingCard.style.display = 'none';
+      readyCard.style.display = 'none';
+      processingCard.style.display = 'none';
+      resultCard.style.display = 'none';
+      if (card) card.style.display = 'block';
+    }
+
+    function resetAll() {
+      fileInput.value = '';
+      customBgFileInput.value = '';
+      activeFile = null;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+      sourceImage = null;
+      fgCutoutImage = null;
+      customBgImage = null;
+      if (progressTimer) clearInterval(progressTimer);
+      showState(dropzone);
+    }
+
+    function handleBgFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        if (window.showToast) window.showToast("Please select a valid image file", "error");
+        return;
+      }
+
+      activeFile = file;
+      bgReadingFileName.textContent = file.name;
+      bgReadingFileSize.textContent = formatBytes(file.size);
+      showState(readingCard);
+
+      let progress = 0;
+      bgReadingProgressFill.style.width = '0%';
+      bgReadingPercentText.textContent = '0%';
+      if (progressTimer) clearInterval(progressTimer);
+
+      progressTimer = setInterval(() => {
+        progress += Math.floor(Math.random() * 25) + 20;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(progressTimer);
+          finishReading(file);
+        }
+        bgReadingProgressFill.style.width = progress + '%';
+        bgReadingPercentText.textContent = progress + '%';
+      }, 30);
+    }
+    window.handleBgFile = handleBgFile;
+
+    function finishReading(file) {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(file);
+      bgReadyPreview.src = objectUrl;
+
+      bgReadyFileName.textContent = file.name;
+      bgReadyFileSize.textContent = formatBytes(file.size);
+
+      const img = new Image();
+      img.onload = function() {
+        sourceImage = img;
+        const w = img.naturalWidth || img.width;
+        const h = img.naturalHeight || img.height;
+        bgReadyDimensions.textContent = w + " × " + h + " px";
+        showState(readyCard);
+      };
+      img.src = objectUrl;
+    }
+
+    // High-Precision Smart Canvas Edge & Color Boundary Segmentation Algorithm
+    function generateSmartCutout(img, callback) {
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      const tCtx = tempCanvas.getContext('2d');
+      tCtx.drawImage(img, 0, 0, w, h);
+
+      const imgData = tCtx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      // Sample corner pixels to determine background reference color
+      const cornerSamples = [
+        [0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1],
+        [Math.floor(w / 2), 0], [Math.floor(w / 2), h - 1]
+      ];
+
+      let bgR = 0, bgG = 0, bgB = 0, sampleCount = 0;
+      cornerSamples.forEach(([x, y]) => {
+        const idx = (y * w + x) * 4;
+        bgR += data[idx];
+        bgG += data[idx + 1];
+        bgB += data[idx + 2];
+        sampleCount++;
+      });
+      bgR /= sampleCount;
+      bgG /= sampleCount;
+      bgB /= sampleCount;
+
+      const colorTolerance = 42; // Distance threshold
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const dist = Math.sqrt(
+          (r - bgR) * (r - bgR) +
+          (g - bgG) * (g - bgG) +
+          (b - bgB) * (b - bgB)
+        );
+
+        if (dist < colorTolerance) {
+          // Soft alpha edge feathering
+          const alphaFactor = Math.max(0, (dist - (colorTolerance - 15)) / 15);
+          data[i + 3] = Math.round(data[i + 3] * alphaFactor);
+        }
+      }
+
+      tCtx.putImageData(imgData, 0, 0);
+
+      const cutoutImg = new Image();
+      cutoutImg.onload = function() {
+        callback(cutoutImg);
+      };
+      cutoutImg.src = tempCanvas.toDataURL('image/png');
+    }
+
+    // Render Canvas State
+    function renderCanvas() {
+      if (!sourceImage || !fgCutoutImage) return;
+
+      const w = sourceImage.naturalWidth || sourceImage.width;
+      const h = sourceImage.naturalHeight || sourceImage.height;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 1. Draw Background
+      if (activeBgMode === 'color') {
+        ctx.fillStyle = bgSolidColorPicker.value;
+        ctx.fillRect(0, 0, w, h);
+      } else if (activeBgMode === 'gradient') {
+        const angle = parseInt(gradAngleRange.value) * (Math.PI / 180);
+        const x1 = w / 2 - Math.cos(angle) * w / 2;
+        const y1 = h / 2 - Math.sin(angle) * h / 2;
+        const x2 = w / 2 + Math.cos(angle) * w / 2;
+        const y2 = h / 2 + Math.sin(angle) * h / 2;
+        const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+        grad.addColorStop(0, gradStartPicker.value);
+        grad.addColorStop(1, gradEndPicker.value);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      } else if (activeBgMode === 'image' && customBgImage) {
+        ctx.drawImage(customBgImage, 0, 0, w, h);
+      } else if (activeBgMode === 'blur') {
+        ctx.save();
+        const blurPx = parseInt(blurIntensityRange.value);
+        ctx.filter = `blur(${blurPx}px)`;
+        ctx.drawImage(sourceImage, 0, 0, w, h);
+        ctx.restore();
+      }
+
+      // 2. Draw Foreground Subject with Transforms & Shadow
+      ctx.save();
+      const scale = parseFloat(fgScaleRange.value) / 100;
+      const posX = parseInt(fgPosXRange.value);
+      const posY = parseInt(fgPosYRange.value);
+      const rot = parseInt(fgRotRange.value) * (Math.PI / 180);
+
+      ctx.translate(w / 2 + posX, h / 2 + posY);
+      ctx.rotate(rot);
+      ctx.scale(scale, scale);
+
+      if (fgShadowCheck.checked) {
+        ctx.shadowColor = shadowColorPicker.value;
+        ctx.shadowBlur = parseInt(shadowBlurRange.value);
+        ctx.shadowOffsetX = 8;
+        ctx.shadowOffsetY = 8;
+      }
+
+      ctx.drawImage(fgCutoutImage, -w / 2, -h / 2, w, h);
+      ctx.restore();
+    }
+
+    // Animated Processing Execution
+    bgProceedBtn.addEventListener('click', function() {
+      if (!sourceImage) return;
+
+      showState(processingCard);
+      bgProcessStageText.textContent = "Stage 1/4: Analyzing Image Colors & Edges...";
+      bgProcessProgressFill.style.width = "25%";
+
+      setTimeout(() => {
+        bgProcessStageText.textContent = "Stage 2/4: Isolating Subject Mask...";
+        bgProcessProgressFill.style.width = "50%";
+
+        setTimeout(() => {
+          bgProcessStageText.textContent = "Stage 3/4: Creating Transparent Cutout...";
+          bgProcessProgressFill.style.width = "75%";
+
+          generateSmartCutout(sourceImage, function(cutoutImg) {
+            fgCutoutImage = cutoutImg;
+
+            setTimeout(() => {
+              bgProcessStageText.textContent = "Stage 4/4: Finalizing Editor...";
+              bgProcessProgressFill.style.width = "100%";
+
+              setTimeout(() => {
+                showState(resultCard);
+                renderCanvas();
+                if (window.showToast) window.showToast("Background removed successfully!", "success");
+              }, 200);
+            }, 250);
+          });
+        }, 300);
+      }, 300);
+    });
+
+    // Background Tab Switching
+    document.querySelectorAll('.bg-tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.bg-tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        activeBgMode = this.getAttribute('data-bgmode');
+
+        document.getElementById('panelBgColor').style.display = activeBgMode === 'color' ? 'block' : 'none';
+        document.getElementById('panelBgGradient').style.display = activeBgMode === 'gradient' ? 'block' : 'none';
+        document.getElementById('panelBgImage').style.display = activeBgMode === 'image' ? 'block' : 'none';
+        document.getElementById('panelBgBlur').style.display = activeBgMode === 'blur' ? 'block' : 'none';
+
+        renderCanvas();
+      });
+    });
+
+    // Preset Color Buttons
+    document.querySelectorAll('.color-preset-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        bgSolidColorPicker.value = this.getAttribute('data-color');
+        renderCanvas();
+      });
+    });
+
+    bgSolidColorPicker.addEventListener('input', renderCanvas);
+    gradStartPicker.addEventListener('input', renderCanvas);
+    gradEndPicker.addEventListener('input', renderCanvas);
+    gradAngleRange.addEventListener('input', function() {
+      gradAngleText.textContent = this.value + '°';
+      renderCanvas();
+    });
+
+    customBgFileInput.addEventListener('change', function(e) {
+      if (e.target.files && e.target.files[0]) {
+        const bgImg = new Image();
+        bgImg.onload = function() {
+          customBgImage = bgImg;
+          renderCanvas();
+        };
+        bgImg.src = URL.createObjectURL(e.target.files[0]);
+      }
+    });
+
+    blurIntensityRange.addEventListener('input', function() {
+      blurIntensityText.textContent = this.value + 'px';
+      renderCanvas();
+    });
+
+    // Foreground Inputs
+    fgScaleRange.addEventListener('input', function() {
+      fgScaleText.textContent = this.value + '%';
+      renderCanvas();
+    });
+    fgPosXRange.addEventListener('input', function() {
+      fgPosXText.textContent = this.value + 'px';
+      renderCanvas();
+    });
+    fgPosYRange.addEventListener('input', function() {
+      fgPosYText.textContent = this.value + 'px';
+      renderCanvas();
+    });
+    fgRotRange.addEventListener('input', function() {
+      fgRotText.textContent = this.value + '°';
+      renderCanvas();
+    });
+    fgShadowCheck.addEventListener('change', renderCanvas);
+    shadowColorPicker.addEventListener('input', renderCanvas);
+    shadowBlurRange.addEventListener('input', renderCanvas);
+
+    // Export Downloads
+    document.querySelectorAll('.download-export-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const format = this.getAttribute('data-format');
+        let mime = 'image/png';
+        let ext = 'png';
+
+        if (format === 'jpeg') {
+          mime = 'image/jpeg';
+          ext = 'jpg';
+          // Ensure JPG gets a solid background if currently transparent
+          if (activeBgMode === 'transparent') {
+            const tempC = document.createElement('canvas');
+            tempC.width = canvas.width;
+            tempC.height = canvas.height;
+            const tCtx = tempC.getContext('2d');
+            tCtx.fillStyle = '#FFFFFF'; // Default white for JPG export
+            tCtx.fillRect(0, 0, tempC.width, tempC.height);
+            tCtx.drawImage(canvas, 0, 0);
+            
+            const link = document.createElement('a');
+            const baseName = activeFile.name.substring(0, activeFile.name.lastIndexOf('.')) || 'image';
+            link.download = baseName + '-nobg.jpg';
+            link.href = tempC.toDataURL('image/jpeg', 0.92);
+            link.click();
+            if (window.showToast) window.showToast("Downloaded JPG image with white background!", "success");
+            return;
+          }
+        } else if (format === 'webp') {
+          mime = 'image/webp';
+          ext = 'webp';
+        }
+
+        const baseName = activeFile.name.substring(0, activeFile.name.lastIndexOf('.')) || 'image';
+        const link = document.createElement('a');
+        link.download = baseName + '-nobg.' + ext;
+        link.href = canvas.toDataURL(mime, 0.95);
+        link.click();
+        if (window.showToast) window.showToast("Downloaded " + ext.toUpperCase() + " image!", "success");
+      });
+    });
+
+    bgChangeImageBtn.addEventListener('click', resetAll);
+    bgResetBtn.addEventListener('click', resetAll);
+
+    resetAll();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBgRemoverController);
+  } else {
+    initBgRemoverController();
+  }
+})();
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

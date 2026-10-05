@@ -1,0 +1,81 @@
+/* SANIX TOOL - Theme System (Dark Theme Default & Light Theme) */
+
+:root, [data-theme="dark"] {
+  /* Color Palette - Dark Futuristic Cyber Obsidian */
+  --bg-main: #0b0f19;
+  --bg-secondary: #0f172a;
+  --surface: #111827;
+  --surface-hover: #1e293b;
+  --surface-border: #1e293b;
+  --border-focus: #00f2fe;
+  
+  /* Text Colors */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  /* Primary & Accent Gradients */
+  --primary: #00f2fe;
+  --primary-hover: #38bdf8;
+  --secondary: #7f00ff;
+  --accent: #4facfe;
+  --accent-glow: rgba(0, 242, 254, 0.25);
+  
+  /* Status Colors */
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.15);
+  --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.15);
+  --error: #ef4444;
+  --error-bg: rgba(239, 68, 68, 0.15);
+  --info: #3b82f6;
+  --info-bg: rgba(59, 130, 246, 0.15);
+  
+  /* Component Effects */
+  --glass-bg: rgba(17, 24, 39, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --glow-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+  --input-bg: #090d16;
+  --navbar-bg: rgba(11, 15, 25, 0.85);
+}
+
+[data-theme="light"] {
+  /* Color Palette - Light Clean Modern Slate */
+  --bg-main: #f1f5f9;
+  --bg-secondary: #e2e8f0;
+  --surface: #ffffff;
+  --surface-hover: #f8fafc;
+  --surface-border: #cbd5e1;
+  --border-focus: #0284c7;
+  
+  /* Text Colors */
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+  
+  /* Primary & Accent Gradients */
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --secondary: #6d28d9;
+  --accent: #2563eb;
+  --accent-glow: rgba(2, 132, 199, 0.15);
+  
+  /* Status Colors */
+  --success: #059669;
+  --success-bg: #d1fae5;
+  --warning: #d97706;
+  --warning-bg: #fef3c7;
+  --error: #dc2626;
+  --error-bg: #fee2e2;
+  --info: #2563eb;
+  --info-bg: #dbeafe;
+  
+  /* Component Effects */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  --glow-shadow: 0 0 15px rgba(2, 132, 199, 0.15);
+  --input-bg: #ffffff;
+  --navbar-bg: rgba(255, 255, 255, 0.9);
+}

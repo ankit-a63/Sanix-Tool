@@ -1,0 +1,104 @@
+<?php
+$pageTitle = "JSON Formatter, Validator & Minifier - Sanix Tool";
+$pageDesc = "Format, validate, prettify, and minify JSON data with instant syntax error detection.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="tool-workspace">
+    <div class="tool-header">
+      <div class="tool-header-info">
+        <div class="tool-icon">🛠️</div>
+        <div>
+          <h1 class="tool-header-title">JSON Formatter & Validator</h1>
+          <p class="tool-header-desc">Validate, prettify, or minify JSON data with instant error feedback.</p>
+        </div>
+      </div>
+      <button class="fav-btn" data-tool="json-formatter" title="Favorite this tool">🤍</button>
+    </div>
+
+    <!-- ERROR ALERT BOX -->
+    <div id="json-error-box" class="card" style="display:none; background:var(--error-bg); border-color:var(--error); color:var(--error); margin-bottom:1rem; padding:1rem;">
+      <strong>Syntax Error Detected:</strong>
+      <div id="json-error-msg" style="margin-top:0.25rem; font-family:monospace;"></div>
+    </div>
+
+    <div class="form-group">
+      <textarea id="json-input" class="form-control code-editor" style="min-height: 280px;" placeholder='Paste raw JSON payload here... e.g. {"name": "Sanix", "active": true}'></textarea>
+    </div>
+
+    <div class="tool-controls-grid">
+      <div class="form-group">
+        <label class="form-label">Indentation Spacing</label>
+        <select id="indent-space" class="form-control">
+          <option value="2">2 Spaces</option>
+          <option value="4" selected>4 Spaces</option>
+          <option value="\t">Tab</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="display:flex; gap:0.5rem; align-items:flex-end;">
+        <button class="btn btn-primary" id="btn-format" style="flex:1;">⚡ Format JSON</button>
+        <button class="btn btn-secondary" id="btn-minify" style="flex:1;">📦 Minify JSON</button>
+      </div>
+    </div>
+
+    <div class="tool-action-bar">
+      <button class="btn btn-secondary" id="clear-btn">🗑️ Clear Input</button>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="btn btn-secondary" id="copy-btn">📋 Copy JSON</button>
+        <button class="btn btn-primary" id="download-btn">⬇️ Download .json File</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  trackToolUsage('json-formatter');
+
+  const jsonInput = document.getElementById('json-input');
+  const indentSelect = document.getElementById('indent-space');
+  const errorBox = document.getElementById('json-error-box');
+  const errorMsg = document.getElementById('json-error-msg');
+
+  function validateAndProcess(isMinify = false) {
+    errorBox.style.display = 'none';
+    const raw = jsonInput.value.trim();
+    if (!raw) return;
+
+    try {
+      const parsed = JSON.parse(raw);
+      const indent = isMinify ? 0 : (indentSelect.value === '\\t' ? '\t' : parseInt(indentSelect.value));
+      jsonInput.value = JSON.stringify(parsed, null, indent);
+      showToast(isMinify ? "JSON minified!" : "JSON formatted cleanly!", "success");
+      if (window.Sani) window.Sani.say("Valid JSON formatted perfectly!", "happy");
+    } catch (err) {
+      errorBox.style.display = 'block';
+      errorMsg.textContent = err.message;
+      showToast("Invalid JSON syntax", "error");
+      if (window.Sani) window.Sani.say("Invalid JSON! Check syntax error below.", "error");
+    }
+  }
+
+  document.getElementById('btn-format').addEventListener('click', () => validateAndProcess(false));
+  document.getElementById('btn-minify').addEventListener('click', () => validateAndProcess(true));
+
+  document.getElementById('copy-btn').addEventListener('click', () => copyToClipboard(jsonInput.value, "JSON payload copied!"));
+  document.getElementById('clear-btn').addEventListener('click', () => {
+    jsonInput.value = '';
+    errorBox.style.display = 'none';
+  });
+
+  document.getElementById('download-btn').addEventListener('click', () => {
+    if (!jsonInput.value) return;
+    const blob = new Blob([jsonInput.value], { type: 'application/json;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sanix-data.json';
+    a.click();
+  });
+});
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -1,0 +1,762 @@
+
+<style>
+.resizer-container {
+  max-width: 960px;
+  margin: 0 auto;
+  background: var(--surface, #1e293b);
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.resizer-dropzone {
+  border: 2px dashed var(--primary, #00f2fe);
+  border-radius: 16px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  background: var(--input-bg, #0f172a);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.resizer-dropzone:hover, .resizer-dropzone.dragover {
+  background: rgba(0, 242, 254, 0.08);
+  border-color: #00c6ff;
+  box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
+}
+
+.resizer-card {
+  background: var(--input-bg, #0f172a);
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.preset-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+  border-radius: 12px;
+  padding: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.preset-card:hover, .preset-card.active {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: var(--primary, #00f2fe);
+  transform: translateY(-2px);
+}
+
+.preset-card-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main, #fff);
+  margin-bottom: 0.2rem;
+}
+
+.preset-card-sub {
+  font-size: 0.75rem;
+  color: var(--primary, #00f2fe);
+  font-weight: 600;
+}
+
+.preset-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+
+.before-after-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .before-after-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.preview-box {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.preview-img-wrapper {
+  overflow: auto;
+  max-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-conic-gradient(#1e293b 0% 25%, #0f172a 0% 50%) 50% / 16px 16px;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.preview-img-wrapper img {
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+</style>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="resizer-container">
+    
+    <!-- TOOL HEADER -->
+    <div class="tool-header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--surface-border);">
+      <div class="tool-header-info" style="display: flex; align-items: center; gap: 1rem;">
+        <div class="tool-icon" style="font-size: 2.2rem;">📐</div>
+        <div>
+          <h1 class="tool-header-title" style="font-size: 1.6rem; margin: 0;">Professional Image Resizer</h1>
+          <p class="tool-header-desc" style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">Resize images using document presets, social media dimensions, DPI, and aspect ratio locking.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACY NOTIFICATION -->
+    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(0, 242, 254, 0.05); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.15);">
+      🔒 <span>Your images are processed locally in your browser. No files are uploaded to any server.</span>
+    </div>
+
+    <!-- 1. DROPZONE CONTAINER -->
+    <div id="resizerDropzone" class="resizer-dropzone">
+      <div style="font-size: 3.2rem; margin-bottom: 0.5rem;">📁</div>
+      <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Drop your image here</div>
+      <div style="margin: 0.85rem 0;">
+        <button type="button" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-size: 1.05rem; pointer-events: none;">[ Choose Image ]</button>
+      </div>
+      <div style="font-size: 0.88rem; color: var(--text-muted);">Supported Formats: <strong>JPG • PNG • WEBP</strong></div>
+      <input type="file" id="resizerFileInput" accept="image/jpeg,image/png,image/webp" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 20;" onchange="if(this.files && this.files[0] && window.handleResizerFile) window.handleResizerFile(this.files[0]);">
+    </div>
+
+    <!-- 2. READING STATE -->
+    <div id="resizerReading" class="resizer-card" style="display: none; text-align: center; padding: 2.5rem 1.5rem;">
+      <span class="btn btn-secondary" style="pointer-events: none; margin-bottom: 0.75rem;">⚡ Reading file...</span>
+      <h3 id="readingFileName" style="font-size: 1.15rem; color: var(--text-main); word-break: break-all;">image.jpg</h3>
+      <small id="readingFileSize" style="color: var(--text-muted);">Calculating size...</small>
+      <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; margin: 1.25rem 0 0.5rem 0;">
+        <div id="readingProgressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00f2fe, #00c6ff); border-radius: 999px; transition: width 0.15s ease;"></div>
+      </div>
+      <div id="readingPercentText" style="font-size: 0.95rem; font-weight: 800; color: var(--primary);">0%</div>
+    </div>
+
+    <!-- 3. FILE READY STATE -->
+    <div id="resizerReady" class="resizer-card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+        <span style="color: #10b981; font-weight: 800; font-size: 0.9rem;">✓ File Ready</span>
+        <button type="button" class="btn btn-secondary" id="changeImageBtn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Change Image</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center;">
+        <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 12px; border: 1px solid var(--surface-border);">
+          <img id="readyImagePreview" src="" alt="Selected Preview" style="max-width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px;">
+        </div>
+        <div>
+          <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">FILE NAME</small>
+          <h4 id="readyFileName" style="font-size: 1.1rem; word-break: break-all; color: var(--text-main); margin: 0 0 0.5rem 0;">filename.jpg</h4>
+          <div style="display: flex; gap: 2rem;">
+            <div>
+              <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">ORIGINAL SIZE</small>
+              <div id="readyFileSize" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">0 MB</div>
+            </div>
+            <div>
+              <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">DIMENSIONS</small>
+              <div id="readyDimensions" style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">0 × 0 px</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" id="proceedResizerBtn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 1rem; font-size: 1.15rem; font-weight: 800;">
+        ➜ PROCEED TO CONFIGURE RESIZING
+      </button>
+    </div>
+
+    <!-- 4. OPTIONS STATE -->
+    <div id="resizerOptions" class="resizer-card" style="display: none;">
+      <h3 style="font-size: 1.15rem; color: var(--primary); margin-top: 0; margin-bottom: 1rem;">1. Select Quick Preset</h3>
+      
+      <!-- PRESETS GRID -->
+      <div class="preset-grid">
+        <div class="preset-card" data-preset="passport-mm">
+          <div class="preset-card-title">Passport Photo</div>
+          <div class="preset-card-sub">35 × 45 mm</div>
+          <div class="preset-tag">Official Document</div>
+        </div>
+        <div class="preset-card" data-preset="passport-in">
+          <div class="preset-card-title">Passport Photo</div>
+          <div class="preset-card-sub">2 × 2 inch</div>
+          <div class="preset-tag">US / Global Visa</div>
+        </div>
+        <div class="preset-card" data-preset="aadhaar">
+          <div class="preset-card-title">Aadhaar / ID</div>
+          <div class="preset-card-sub">35 × 45 mm</div>
+          <div class="preset-tag">Configurable Preset</div>
+        </div>
+        <div class="preset-card" data-preset="pan">
+          <div class="preset-card-title">PAN Card</div>
+          <div class="preset-card-sub">25 × 35 mm</div>
+          <div class="preset-tag">Configurable Preset</div>
+        </div>
+        <div class="preset-card" data-preset="visa">
+          <div class="preset-card-title">Visa Photo</div>
+          <div class="preset-card-sub">51 × 51 mm</div>
+          <div class="preset-tag">Configurable Preset</div>
+        </div>
+        <div class="preset-card" data-preset="ig-post">
+          <div class="preset-card-title">Instagram Post</div>
+          <div class="preset-card-sub">1080 × 1080 px</div>
+          <div class="preset-tag">1:1 Square</div>
+        </div>
+        <div class="preset-card" data-preset="ig-story">
+          <div class="preset-card-title">Instagram Story</div>
+          <div class="preset-card-sub">1080 × 1920 px</div>
+          <div class="preset-tag">9:16 Vertical</div>
+        </div>
+        <div class="preset-card" data-preset="yt-thumb">
+          <div class="preset-card-title">YouTube Thumb</div>
+          <div class="preset-card-sub">1280 × 720 px</div>
+          <div class="preset-tag">16:9 HD</div>
+        </div>
+        <div class="preset-card" data-preset="wa-dp">
+          <div class="preset-card-title">WhatsApp DP</div>
+          <div class="preset-card-sub">500 × 500 px</div>
+          <div class="preset-tag">Profile Picture</div>
+        </div>
+        <div class="preset-card" data-preset="linkedin">
+          <div class="preset-card-title">LinkedIn Profile</div>
+          <div class="preset-card-sub">400 × 400 px</div>
+          <div class="preset-tag">Square DP</div>
+        </div>
+        <div class="preset-card" data-preset="fb-cover">
+          <div class="preset-card-title">Facebook Cover</div>
+          <div class="preset-card-sub">820 × 312 px</div>
+          <div class="preset-tag">Banner</div>
+        </div>
+        <div class="preset-card active" data-preset="custom">
+          <div class="preset-card-title">Custom Size</div>
+          <div class="preset-card-sub">Manual Controls</div>
+          <div class="preset-tag">Custom Pixels</div>
+        </div>
+      </div>
+
+      <h3 style="font-size: 1.15rem; color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">2. Manual Dimensions & Controls</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">Width</label>
+          <input type="number" id="widthInput" class="form-control" min="1" placeholder="Width">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">Height</label>
+          <input type="number" id="heightInput" class="form-control" min="1" placeholder="Height">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">Unit</label>
+          <select id="unitSelect" class="form-control">
+            <option value="px" selected>Pixels (px)</option>
+            <option value="mm">Millimeters (mm)</option>
+            <option value="inch">Inches (in)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">Target DPI / PPI</label>
+          <select id="dpiSelect" class="form-control">
+            <option value="72">72 DPI (Web)</option>
+            <option value="96">96 DPI (Screen)</option>
+            <option value="150">150 DPI (Draft Print)</option>
+            <option value="300" selected>300 DPI (High Print Quality)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ASPECT LOCK & FIT MODE -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" id="aspectLockCheck" checked style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;">
+          <label for="aspectLockCheck" style="font-weight: 700; cursor: pointer; margin: 0;">🔒 Lock Aspect Ratio</label>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label class="form-label" style="font-weight: 600;">Resize Fit Mode</label>
+          <select id="fitModeSelect" class="form-control">
+            <option value="stretch" selected>Stretch / Exact Fill</option>
+            <option value="contain">Contain (Pad background)</option>
+            <option value="cover">Cover (Center Crop)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin: 0;">
+          <label class="form-label" style="font-weight: 600;">Background Padding Color</label>
+          <input type="color" id="bgColorPicker" value="#ffffff" class="form-control" style="height: 38px; padding: 2px; cursor: pointer;">
+        </div>
+      </div>
+
+      <!-- FORMAT & QUALITY -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">Output Format</label>
+          <select id="outputFormatSelect" class="form-control">
+            <option value="image/jpeg">JPG / JPEG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp" selected>WEBP (Best Efficiency)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="display: flex; justify-content: space-between; font-weight: 600;">
+            <span>Image Quality</span>
+            <strong id="qualityValueText" style="color: var(--primary);">92%</strong>
+          </label>
+          <input type="range" id="qualityRange" min="5" max="100" value="92" class="form-control" style="height: 10px; cursor: pointer;">
+        </div>
+      </div>
+
+      <button type="button" id="resizeNowBtn" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.15rem; font-weight: 800;">
+        📐 RESIZE IMAGE NOW
+      </button>
+    </div>
+
+    <!-- 5. PROCESSING STATE -->
+    <div id="resizerProcessing" class="resizer-card" style="display: none; text-align: center; padding: 2rem;">
+      <span class="btn btn-secondary" style="pointer-events: none;">⚡ Resizing image... Please wait</span>
+    </div>
+
+    <!-- 6. RESULT STATE -->
+    <div id="resizerResult" class="resizer-card" style="display: none; background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.3);">
+      <div style="margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #10b981; font-size: 1.2rem; font-weight: 800;">✓ Resizing Complete</span>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <small style="color: var(--text-muted);">Zoom Preview:</small>
+          <button type="button" class="btn btn-secondary zoom-btn" data-zoom="0.5" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">50%</button>
+          <button type="button" class="btn btn-secondary zoom-btn active" data-zoom="1.0" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">100%</button>
+          <button type="button" class="btn btn-secondary zoom-btn" data-zoom="1.5" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">150%</button>
+        </div>
+      </div>
+
+      <!-- BEFORE / AFTER COMPARISON PREVIEW -->
+      <div class="before-after-grid">
+        <div class="preview-box">
+          <small style="color: var(--text-muted); font-weight: 700; text-transform: uppercase;">ORIGINAL IMAGE</small>
+          <div class="preview-img-wrapper" style="margin-top: 0.5rem;">
+            <img id="origImgPreview" src="" alt="Original Image">
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+            <div id="origResMetrics">0 × 0 px | 0 MB</div>
+          </div>
+        </div>
+
+        <div class="preview-box" style="border-color: rgba(16, 185, 129, 0.4);">
+          <small style="color: #10b981; font-weight: 700; text-transform: uppercase;">RESIZED RESULT</small>
+          <div class="preview-img-wrapper" style="margin-top: 0.5rem;">
+            <img id="resultImgPreview" src="" alt="Resized Result">
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #10b981; font-weight: 700;">
+            <div id="resultResMetrics">0 × 0 px | 0 KB</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOWNLOAD & RESET BUTTONS -->
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+        <a id="downloadResizedBtn" href="#" download="resized-image.png" class="btn btn-primary" style="flex: 2; padding: 0.95rem; font-size: 1.1rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border: none; text-decoration: none; text-align: center;">
+          ⬇ DOWNLOAD RESIZED IMAGE
+        </a>
+        <button type="button" id="resizerResetBtn" class="btn btn-secondary" style="flex: 1; padding: 0.95rem;">
+          ↻ RESIZE ANOTHER IMAGE
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  function initResizerController() {
+    const dropzone = document.getElementById('resizerDropzone');
+    const readingCard = document.getElementById('resizerReading');
+    const readyCard = document.getElementById('resizerReady');
+    const optionsCard = document.getElementById('resizerOptions');
+    const processingCard = document.getElementById('resizerProcessing');
+    const resultCard = document.getElementById('resizerResult');
+
+    const fileInput = document.getElementById('resizerFileInput');
+    const changeImageBtn = document.getElementById('changeImageBtn');
+    const proceedBtn = document.getElementById('proceedResizerBtn');
+
+    const readyImagePreview = document.getElementById('readyImagePreview');
+    const readyFileName = document.getElementById('readyFileName');
+    const readyFileSize = document.getElementById('readyFileSize');
+    const readyDimensions = document.getElementById('readyDimensions');
+
+    const readingFileName = document.getElementById('readingFileName');
+    const readingFileSize = document.getElementById('readingFileSize');
+    const readingProgressFill = document.getElementById('readingProgressFill');
+    const readingPercentText = document.getElementById('readingPercentText');
+
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+    const unitSelect = document.getElementById('unitSelect');
+    const dpiSelect = document.getElementById('dpiSelect');
+    const aspectLockCheck = document.getElementById('aspectLockCheck');
+    const fitModeSelect = document.getElementById('fitModeSelect');
+    const bgColorPicker = document.getElementById('bgColorPicker');
+    const outputFormatSelect = document.getElementById('outputFormatSelect');
+    const qualityRange = document.getElementById('qualityRange');
+    const qualityValueText = document.getElementById('qualityValueText');
+    const resizeNowBtn = document.getElementById('resizeNowBtn');
+
+    const origImgPreview = document.getElementById('origImgPreview');
+    const resultImgPreview = document.getElementById('resultImgPreview');
+    const origResMetrics = document.getElementById('origResMetrics');
+    const resultResMetrics = document.getElementById('resultResMetrics');
+    const downloadResizedBtn = document.getElementById('downloadResizedBtn');
+    const resizerResetBtn = document.getElementById('resizerResetBtn');
+
+    let activeFile = null;
+    let objectUrl = null;
+    let resizedBlobUrl = null;
+    let originalWidth = 0;
+    let originalHeight = 0;
+    let aspectRatio = 1;
+    let progressTimer = null;
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function showState(card) {
+      dropzone.style.display = 'none';
+      readingCard.style.display = 'none';
+      readyCard.style.display = 'none';
+      optionsCard.style.display = 'none';
+      processingCard.style.display = 'none';
+      resultCard.style.display = 'none';
+      if (card) card.style.display = 'block';
+    }
+
+    function resetAll() {
+      fileInput.value = '';
+      activeFile = null;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      if (resizedBlobUrl) URL.revokeObjectURL(resizedBlobUrl);
+      objectUrl = null;
+      resizedBlobUrl = null;
+      if (progressTimer) clearInterval(progressTimer);
+      showState(dropzone);
+    }
+
+    function convertMmToPx(mm, dpi) {
+      return Math.round((mm * dpi) / 25.4);
+    }
+
+    function convertInchToPx(inch, dpi) {
+      return Math.round(inch * dpi);
+    }
+
+    function convertPxToUnit(px, unit, dpi) {
+      if (unit === 'mm') return parseFloat(((px * 25.4) / dpi).toFixed(2));
+      if (unit === 'inch') return parseFloat((px / dpi).toFixed(2));
+      return px;
+    }
+
+    function convertUnitToPx(val, unit, dpi) {
+      if (unit === 'mm') return convertMmToPx(val, dpi);
+      if (unit === 'inch') return convertInchToPx(val, dpi);
+      return Math.round(val);
+    }
+
+    function handleResizerFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        if (window.showToast) window.showToast("Please select a valid image file", "error");
+        return;
+      }
+
+      activeFile = file;
+      readingFileName.textContent = file.name;
+      readingFileSize.textContent = formatBytes(file.size);
+      showState(readingCard);
+
+      let progress = 0;
+      readingProgressFill.style.width = '0%';
+      readingPercentText.textContent = '0%';
+      if (progressTimer) clearInterval(progressTimer);
+
+      progressTimer = setInterval(() => {
+        progress += Math.floor(Math.random() * 25) + 20;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(progressTimer);
+          finishReading(file);
+        }
+        readingProgressFill.style.width = progress + '%';
+        readingPercentText.textContent = progress + '%';
+      }, 30);
+    }
+    window.handleResizerFile = handleResizerFile;
+
+    function finishReading(file) {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(file);
+      readyImagePreview.src = objectUrl;
+      origImgPreview.src = objectUrl;
+
+      readyFileName.textContent = file.name;
+      readyFileSize.textContent = formatBytes(file.size);
+
+      const img = new Image();
+      img.onload = function() {
+        originalWidth = img.naturalWidth || img.width;
+        originalHeight = img.naturalHeight || img.height;
+        aspectRatio = originalWidth / originalHeight;
+
+        readyDimensions.textContent = originalWidth + " × " + originalHeight + " px";
+        origResMetrics.textContent = originalWidth + " × " + originalHeight + " px | " + formatBytes(file.size);
+
+        widthInput.value = originalWidth;
+        heightInput.value = originalHeight;
+        unitSelect.value = 'px';
+        dpiSelect.value = '300';
+
+        showState(readyCard);
+      };
+      img.src = objectUrl;
+    }
+
+    // Bidirectional Aspect Ratio Locking
+    widthInput.addEventListener('input', function() {
+      if (aspectLockCheck.checked && originalWidth > 0 && widthInput.value) {
+        const dpi = parseInt(dpiSelect.value) || 300;
+        const wPx = convertUnitToPx(parseFloat(widthInput.value), unitSelect.value, dpi);
+        const hPx = Math.round(wPx / aspectRatio);
+        heightInput.value = convertPxToUnit(hPx, unitSelect.value, dpi);
+      }
+    });
+
+    heightInput.addEventListener('input', function() {
+      if (aspectLockCheck.checked && originalHeight > 0 && heightInput.value) {
+        const dpi = parseInt(dpiSelect.value) || 300;
+        const hPx = convertUnitToPx(parseFloat(heightInput.value), unitSelect.value, dpi);
+        const wPx = Math.round(hPx * aspectRatio);
+        widthInput.value = convertPxToUnit(wPx, unitSelect.value, dpi);
+      }
+    });
+
+    // Preset Cards Click Handling
+    document.querySelectorAll('.preset-card').forEach(card => {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+
+        const preset = this.getAttribute('data-preset');
+        const dpi = parseInt(dpiSelect.value) || 300;
+
+        if (preset === 'passport-mm' || preset === 'aadhaar') {
+          unitSelect.value = 'mm';
+          widthInput.value = 35;
+          heightInput.value = 45;
+          aspectLockCheck.checked = false;
+        } else if (preset === 'passport-in') {
+          unitSelect.value = 'inch';
+          widthInput.value = 2;
+          heightInput.value = 2;
+          aspectLockCheck.checked = true;
+        } else if (preset === 'pan') {
+          unitSelect.value = 'mm';
+          widthInput.value = 25;
+          heightInput.value = 35;
+          aspectLockCheck.checked = false;
+        } else if (preset === 'visa') {
+          unitSelect.value = 'mm';
+          widthInput.value = 51;
+          heightInput.value = 51;
+          aspectLockCheck.checked = true;
+        } else if (preset === 'ig-post') {
+          unitSelect.value = 'px';
+          widthInput.value = 1080;
+          heightInput.value = 1080;
+          aspectLockCheck.checked = true;
+        } else if (preset === 'ig-story') {
+          unitSelect.value = 'px';
+          widthInput.value = 1080;
+          heightInput.value = 1920;
+          aspectLockCheck.checked = false;
+        } else if (preset === 'yt-thumb') {
+          unitSelect.value = 'px';
+          widthInput.value = 1280;
+          heightInput.value = 720;
+          aspectLockCheck.checked = false;
+        } else if (preset === 'wa-dp' || preset === 'linkedin') {
+          unitSelect.value = 'px';
+          widthInput.value = preset === 'wa-dp' ? 500 : 400;
+          heightInput.value = widthInput.value;
+          aspectLockCheck.checked = true;
+        } else if (preset === 'fb-cover') {
+          unitSelect.value = 'px';
+          widthInput.value = 820;
+          heightInput.value = 312;
+          aspectLockCheck.checked = false;
+        } else if (preset === 'custom') {
+          unitSelect.value = 'px';
+          widthInput.value = originalWidth;
+          heightInput.value = originalHeight;
+          aspectLockCheck.checked = true;
+        }
+      });
+    });
+
+    qualityRange.addEventListener('input', function() {
+      qualityValueText.textContent = this.value + '%';
+    });
+
+    proceedBtn.addEventListener('click', function() {
+      readyCard.style.display = 'block';
+      optionsCard.style.display = 'block';
+      optionsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // Resize Action Execution
+    resizeNowBtn.addEventListener('click', function() {
+      if (!activeFile || !objectUrl) return;
+
+      const unit = unitSelect.value;
+      const dpi = parseInt(dpiSelect.value) || 300;
+      const valW = parseFloat(widthInput.value);
+      const valH = parseFloat(heightInput.value);
+
+      if (!valW || !valH || valW <= 0 || valH <= 0) {
+        if (window.showToast) window.showToast("Please enter valid width and height values", "warning");
+        return;
+      }
+
+      const targetW = convertUnitToPx(valW, unit, dpi);
+      const targetH = convertUnitToPx(valH, unit, dpi);
+
+      resizeNowBtn.disabled = true;
+      showState(processingCard);
+
+      setTimeout(() => {
+        const img = new Image();
+        img.onload = function() {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+
+            const fitMode = fitModeSelect.value;
+            const bgColor = bgColorPicker.value;
+
+            if (fitMode === 'contain') {
+              ctx.fillStyle = bgColor;
+              ctx.fillRect(0, 0, targetW, targetH);
+              const scale = Math.min(targetW / originalWidth, targetH / originalHeight);
+              const nw = originalWidth * scale;
+              const nh = originalHeight * scale;
+              const nx = (targetW - nw) / 2;
+              const ny = (targetH - nh) / 2;
+              ctx.drawImage(img, nx, ny, nw, nh);
+            } else if (fitMode === 'cover') {
+              const scale = Math.max(targetW / originalWidth, targetH / originalHeight);
+              const nw = originalWidth * scale;
+              const nh = originalHeight * scale;
+              const nx = (targetW - nw) / 2;
+              const ny = (targetH - nh) / 2;
+              ctx.drawImage(img, nx, ny, nw, nh);
+            } else {
+              // Stretch / Exact Fill
+              ctx.drawImage(img, 0, 0, targetW, targetH);
+            }
+
+            const mime = outputFormatSelect.value;
+            const quality = parseFloat(qualityRange.value) / 100;
+
+            canvas.toBlob(function(blob) {
+              resizeNowBtn.disabled = false;
+              if (!blob) {
+                if (window.showToast) window.showToast("Resizing failed to generate blob", "error");
+                return;
+              }
+
+              if (resizedBlobUrl) URL.revokeObjectURL(resizedBlobUrl);
+              resizedBlobUrl = URL.createObjectURL(blob);
+              resultImgPreview.src = resizedBlobUrl;
+
+              let ext = 'png';
+              if (mime.includes('jpeg')) ext = 'jpg';
+              if (mime.includes('webp')) ext = 'webp';
+
+              resultResMetrics.textContent = targetW + " × " + targetH + " px (" + dpi + " DPI) | " + formatBytes(blob.size);
+              
+              const baseName = activeFile.name.substring(0, activeFile.name.lastIndexOf('.')) || 'image';
+              downloadResizedBtn.href = resizedBlobUrl;
+              downloadResizedBtn.download = baseName + "-resized-" + targetW + "x" + targetH + "." + ext;
+
+              showState(resultCard);
+              resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              if (window.showToast) window.showToast("Image resized successfully!", "success");
+            }, mime, quality);
+          } catch (err) {
+            resizeNowBtn.disabled = false;
+            if (window.showToast) window.showToast("Error resizing image: " + err.message, "error");
+          }
+        };
+        img.src = objectUrl;
+      }, 150);
+    });
+
+    // Zoom buttons
+    document.querySelectorAll('.zoom-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const zoom = parseFloat(this.getAttribute('data-zoom'));
+        origImgPreview.style.transform = 'scale(' + zoom + ')';
+        resultImgPreview.style.transform = 'scale(' + zoom + ')';
+      });
+    });
+
+    changeImageBtn.addEventListener('click', resetAll);
+    resizerResetBtn.addEventListener('click', resetAll);
+
+    resetAll();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initResizerController);
+  } else {
+    initResizerController();
+  }
+})();
+</script>
+

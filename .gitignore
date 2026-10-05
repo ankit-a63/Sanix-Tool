@@ -1,0 +1,10 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Environment & local credentials (if any)
+.env
+config/database.php
+database/

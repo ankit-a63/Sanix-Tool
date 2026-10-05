@@ -1,0 +1,102 @@
+/* SANIX TOOL - SANI Virtual Assistant Styles */
+
+#sani-assistant-container {
+  position: fixed;
+  bottom: 20px;
+  right: 25px;
+  z-index: 990;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+#sani-speech-bubble {
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  border-radius: 14px;
+  padding: 0.85rem 1.1rem;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: var(--glow-shadow);
+  max-width: 260px;
+  margin-bottom: 8px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+}
+
+#sani-speech-bubble.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+#sani-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  right: 35px;
+  width: 12px;
+  height: 12px;
+  background: var(--surface);
+  border-right: 1px solid var(--primary);
+  border-bottom: 1px solid var(--primary);
+  transform: rotate(45deg);
+}
+
+.sani-avatar-wrapper {
+  width: 110px;
+  height: 110px;
+  position: relative;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.25s ease;
+  filter: drop-shadow(0 8px 16px rgba(0, 242, 254, 0.2));
+}
+
+.sani-avatar-wrapper:hover {
+  transform: scale(1.08) translateY(-4px);
+}
+
+.sani-avatar-wrapper svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Sani Speech Sound Badge */
+.sani-speaker-badge {
+  position: absolute;
+  top: -5px;
+  left: 0;
+  background: var(--primary);
+  color: #040914;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+/* Sani Floating Animation */
+@keyframes saniFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.sani-floating {
+  animation: saniFloat 4s ease-in-out infinite;
+}
+
+/* Minimized Mode */
+#sani-assistant-container.minimized #sani-speech-bubble {
+  display: none !important;
+}
+
+#sani-assistant-container.minimized .sani-avatar-wrapper {
+  width: 50px;
+  height: 50px;
+  opacity: 0.8;
+}

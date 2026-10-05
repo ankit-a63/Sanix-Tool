@@ -1,0 +1,83 @@
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="tool-workspace">
+    <div class="tool-header">
+      <div class="tool-header-info">
+        <div class="tool-icon">🔗</div>
+        <div>
+          <h1 class="tool-header-title">SEO Text Slug Generator</h1>
+          <p class="tool-header-desc">Generate URL-safe website slugs from titles, headlines, or product names.</p>
+        </div>
+      </div>
+      <button class="fav-btn" data-tool="slug-generator" title="Favorite this tool">🤍</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Input Text</label>
+      <input type="text" id="slug-input" class="form-control" placeholder="e.g. Sanix Tool - All-in-One Online Platform 2026!" value="Sanix Tool - All-in-One Online Platform 2026!">
+    </div>
+
+    <div class="tool-controls-grid">
+      <div class="form-group">
+        <label class="form-label">Word Separator</label>
+        <select id="slug-sep" class="form-control">
+          <option value="-">Hyphen (-)</option>
+          <option value="_">Underscore (_)</option>
+          <option value=".">Dot (.)</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; margin-top:1.8rem;">
+        <input type="checkbox" id="slug-lowercase" checked style="width:18px; height:18px; accent-color:var(--primary); cursor:pointer;">
+        <label for="slug-lowercase" style="font-weight:600; cursor:pointer; color:var(--text-main);">Force Lowercase</label>
+      </div>
+    </div>
+
+    <div class="tool-result-box">
+      <div class="result-header">
+        <span class="result-title">Generated SEO Slug</span>
+        <button class="btn btn-primary" id="copy-btn">📋 Copy Slug</button>
+      </div>
+      <div id="slug-output" class="code-editor" style="font-size:1.1rem; color:var(--primary);">sanix-tool-all-in-one-online-platform-2026</div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  trackToolUsage('slug-generator');
+
+  const slugInput = document.getElementById('slug-input');
+  const slugSep = document.getElementById('slug-sep');
+  const slugLower = document.getElementById('slug-lowercase');
+  const slugOutput = document.getElementById('slug-output');
+
+  function generateSlug() {
+    let str = slugInput.value;
+    if (slugLower.checked) str = str.toLowerCase();
+
+    const sep = slugSep.value;
+    // Replace non-alphanumeric chars with separator
+    const slug = str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9\s-_.]/g, '')
+      .trim()
+      .replace(/[\s-_.]+/g, sep)
+      .replace(new RegExp(`^\\${sep}+|\\${sep}+$`, 'g'), '');
+
+    slugOutput.textContent = slug || 'your-seo-slug-here';
+  }
+
+  slugInput.addEventListener('input', generateSlug);
+  slugSep.addEventListener('change', generateSlug);
+  slugLower.addEventListener('change', generateSlug);
+
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    copyToClipboard(slugOutput.textContent, "SEO slug copied!");
+  });
+
+  generateSlug();
+});
+</script>
+

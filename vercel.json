@@ -1,0 +1,18 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/tools/image/:tool", "destination": "/tools/image/:tool.html" },
+    { "source": "/tools/pdf/:tool", "destination": "/tools/pdf/:tool.html" },
+    { "source": "/tools/text/:tool", "destination": "/tools/text/:tool.html" },
+    { "source": "/tools/developer/:tool", "destination": "/tools/developer/:tool.html" },
+    { "source": "/tools/calculator/:tool", "destination": "/tools/calculator/:tool.html" },
+    { "source": "/tools/file/:tool", "destination": "/tools/file/:tool.html" },
+    { "source": "/tools", "destination": "/tools.html" },
+    { "source": "/favorites", "destination": "/favorites.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" }
+  ]
+}

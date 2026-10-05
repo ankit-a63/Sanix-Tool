@@ -1,0 +1,124 @@
+<?php
+$pageTitle = "Scientific & Basic Calculator - Sanix Tool";
+$pageDesc = "Full visual scientific calculator with calculation history log and advanced math functions.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="tool-workspace" style="max-width: 600px; margin: 0 auto;">
+    <div class="tool-header">
+      <div class="tool-header-info">
+        <div class="tool-icon">🧮</div>
+        <div>
+          <h1 class="tool-header-title">Scientific Calculator</h1>
+          <p class="tool-header-desc">Perform basic math and scientific calculations.</p>
+        </div>
+      </div>
+      <button class="fav-btn" data-tool="basic-calculator" title="Favorite this tool">🤍</button>
+    </div>
+
+    <!-- CALCULATOR DISPLAY -->
+    <div class="card" style="background:var(--input-bg); padding:1.25rem; margin-bottom:1.5rem;">
+      <div id="calc-history" style="font-size:0.85rem; color:var(--text-muted); min-height:20px; text-align:right; overflow:hidden;"></div>
+      <input type="text" id="calc-display" class="form-control code-editor" style="font-size:2rem; text-align:right; font-weight:700; border:none; background:transparent;" value="0" readonly>
+    </div>
+
+    <!-- KEYPAD GRID -->
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:0.75rem;">
+      <button class="btn btn-secondary calc-key" data-action="clear" style="color:var(--error); font-weight:800;">C</button>
+      <button class="btn btn-secondary calc-key" data-action="backspace">⌫</button>
+      <button class="btn btn-secondary calc-key" data-val="(">(</button>
+      <button class="btn btn-secondary calc-key" data-val=")">)</button>
+
+      <button class="btn btn-secondary calc-key" data-val="sin(">sin</button>
+      <button class="btn btn-secondary calc-key" data-val="cos(">cos</button>
+      <button class="btn btn-secondary calc-key" data-val="tan(">tan</button>
+      <button class="btn btn-secondary calc-key" data-val="/" style="color:var(--primary); font-weight:800;">÷</button>
+
+      <button class="btn btn-secondary calc-key" data-val="7">7</button>
+      <button class="btn btn-secondary calc-key" data-val="8">8</button>
+      <button class="btn btn-secondary calc-key" data-val="9">9</button>
+      <button class="btn btn-secondary calc-key" data-val="*" style="color:var(--primary); font-weight:800;">×</button>
+
+      <button class="btn btn-secondary calc-key" data-val="4">4</button>
+      <button class="btn btn-secondary calc-key" data-val="5">5</button>
+      <button class="btn btn-secondary calc-key" data-val="6">6</button>
+      <button class="btn btn-secondary calc-key" data-val="-" style="color:var(--primary); font-weight:800;">-</button>
+
+      <button class="btn btn-secondary calc-key" data-val="1">1</button>
+      <button class="btn btn-secondary calc-key" data-val="2">2</button>
+      <button class="btn btn-secondary calc-key" data-val="3">3</button>
+      <button class="btn btn-secondary calc-key" data-val="+" style="color:var(--primary); font-weight:800;">+</button>
+
+      <button class="btn btn-secondary calc-key" data-val="0">0</button>
+      <button class="btn btn-secondary calc-key" data-val=".">.</button>
+      <button class="btn btn-secondary calc-key" data-val="Math.PI">π</button>
+      <button class="btn btn-primary calc-key" data-action="equals" style="font-size:1.4rem; font-weight:800;">=</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  trackToolUsage('basic-calculator');
+
+  const display = document.getElementById('calc-display');
+  const history = document.getElementById('calc-history');
+  let currentExpr = '';
+
+  function updateDisplay() {
+    display.value = currentExpr || '0';
+  }
+
+  document.querySelectorAll('.calc-key').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.getAttribute('data-val');
+      const action = btn.getAttribute('data-action');
+
+      if (action === 'clear') {
+        currentExpr = '';
+        history.textContent = '';
+      } else if (action === 'backspace') {
+        currentExpr = currentExpr.slice(0, -1);
+      } else if (action === 'equals') {
+        try {
+          // Safe eval using Math scope
+          const sanitized = currentExpr
+            .replace(/sin\(/g, 'Math.sin(')
+            .replace(/cos\(/g, 'Math.cos(')
+            .replace(/tan\(/g, 'Math.tan(');
+          const result = eval(sanitized);
+          history.textContent = `${currentExpr} =`;
+          currentExpr = String(result);
+        } catch (e) {
+          history.textContent = 'Error';
+          showToast("Invalid calculation expression", "error");
+        }
+      } else if (val) {
+        if (currentExpr === '0') currentExpr = '';
+        currentExpr += val;
+      }
+      updateDisplay();
+    });
+  });
+
+  // Keyboard input support
+  document.addEventListener('keydown', (e) => {
+    if (/[0-9\+\-\*\/\(\)\.]/.test(e.key)) {
+      if (currentExpr === '0') currentExpr = '';
+      currentExpr += e.key;
+      updateDisplay();
+    } else if (e.key === 'Enter') {
+      document.querySelector('[data-action="equals"]').click();
+    } else if (e.key === 'Backspace') {
+      currentExpr = currentExpr.slice(0, -1);
+      updateDisplay();
+    } else if (e.key === 'Escape') {
+      currentExpr = '';
+      updateDisplay();
+    }
+  });
+});
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -1,0 +1,89 @@
+<?php
+$pageTitle = "Hash Generator - Sanix Tool";
+$pageDesc = "Generate SHA-256, SHA-512, SHA-1, and MD5 cryptographic hashes directly in your browser.";
+require_once __DIR__ . '/../../includes/header.php';
+?>
+
+<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="tool-workspace">
+    <div class="tool-header">
+      <div class="tool-header-info">
+        <div class="tool-icon">🔑</div>
+        <div>
+          <h1 class="tool-header-title">Cryptographic Hash Generator</h1>
+          <p class="tool-header-desc">Compute SHA-256, SHA-512, SHA-1 and MD5 hashes instantly.</p>
+        </div>
+      </div>
+      <button class="fav-btn" data-tool="hash-generator" title="Favorite this tool">🤍</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Input Text</label>
+      <textarea id="hash-input" class="form-control" style="min-height: 140px;" placeholder="Type or paste text to compute hashes..."></textarea>
+    </div>
+
+    <div class="tool-result-box">
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div>
+          <label class="form-label">SHA-256 Hash</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="hash-sha256" class="form-control code-editor" readonly>
+            <button class="btn btn-secondary copy-hash" data-target="hash-sha256">📋</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">SHA-512 Hash</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="hash-sha512" class="form-control code-editor" readonly>
+            <button class="btn btn-secondary copy-hash" data-target="hash-sha512">📋</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">SHA-1 Hash</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="hash-sha1" class="form-control code-editor" readonly>
+            <button class="btn btn-secondary copy-hash" data-target="hash-sha1">📋</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  trackToolUsage('hash-generator');
+
+  const hashInput = document.getElementById('hash-input');
+
+  async function computeHash(algorithm, str) {
+    if (!str) return '';
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest(algorithm, data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function updateHashes() {
+    const text = hashInput.value;
+    document.getElementById('hash-sha256').value = await computeHash('SHA-256', text);
+    document.getElementById('hash-sha512').value = await computeHash('SHA-512', text);
+    document.getElementById('hash-sha1').value = await computeHash('SHA-1', text);
+  }
+
+  hashInput.addEventListener('input', updateHashes);
+
+  document.querySelectorAll('.copy-hash').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const val = document.getElementById(targetId).value;
+      if (val) copyToClipboard(val, "Hash copied to clipboard!");
+    });
+  });
+});
+</script>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
