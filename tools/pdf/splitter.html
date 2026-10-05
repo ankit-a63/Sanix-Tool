@@ -32,6 +32,7 @@
     window.showToast = window.showToast || function(msg, type) { console.log("[" + (type||'info') + "] " + msg); };
     window.trackToolUsage = window.trackToolUsage || function(name) { console.log("Track: " + name); };
   </script>
+  <script src="/assets/lib/pdf-lib.min.js"></script>
 </head>
 <body >
 
@@ -44,16 +45,16 @@
 
 <nav class="navbar">
   <div class="container nav-container">
-    <a href="/tools/pdf/" class="nav-brand">
+    <a href="/" class="nav-brand">
       <img src="/assets/images/branding/sanix-logo.svg" alt="Sanix Tool Logo">
     </a>
 
     <ul class="nav-menu">
-      <li><a href="/tools/pdf/" class="nav-link">Home</a></li>
-      <li><a href="/tools/pdf/tools.php" class="nav-link">All Tools</a></li>
-      <li><a href="/tools/pdf/favorites.php" class="nav-link">Favorites ❤️</a></li>
-      <li><a href="/tools/pdf/about.php" class="nav-link">About</a></li>
-      <li><a href="/tools/pdf/contact.php" class="nav-link">Contact</a></li>
+      <li><a href="/" class="nav-link">Home</a></li>
+      <li><a href="/tools" class="nav-link">All Tools</a></li>
+      <li><a href="/favorites" class="nav-link">Favorites ❤️</a></li>
+      <li><a href="/about" class="nav-link">About</a></li>
+      <li><a href="/contact" class="nav-link">Contact</a></li>
     </ul>
 
     <div class="nav-actions">
@@ -521,30 +522,30 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="footer-col">
         <h5>Tool Categories</h5>
         <ul class="footer-links">
-          <li><a href="/tools/pdf/tools.php?category=image">Image Tools</a></li>
-          <li><a href="/tools/pdf/tools.php?category=pdf">PDF Tools</a></li>
-          <li><a href="/tools/pdf/tools.php?category=text">Text Utilities</a></li>
-          <li><a href="/tools/pdf/tools.php?category=developer">Developer Tools</a></li>
-          <li><a href="/tools/pdf/tools.php?category=calculator">Calculators</a></li>
-          <li><a href="/tools/pdf/tools.php?category=file">File Utilities</a></li>
+          <li><a href="/tools?category=image">Image Tools</a></li>
+          <li><a href="/tools?category=pdf">PDF Tools</a></li>
+          <li><a href="/tools?category=text">Text Utilities</a></li>
+          <li><a href="/tools?category=developer">Developer Tools</a></li>
+          <li><a href="/tools?category=calculator">Calculators</a></li>
+          <li><a href="/tools?category=file">File Utilities</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h5>Quick Links</h5>
         <ul class="footer-links">
-          <li><a href="/tools/pdf/tools.php">All Tools Directory</a></li>
-          <li><a href="/tools/pdf/favorites.php">Your Favorites</a></li>
-          <li><a href="/tools/pdf/about.php">About Sanix Tool</a></li>
-          <li><a href="/tools/pdf/contact.php">Contact & Feedback</a></li>
+          <li><a href="/tools">All Tools Directory</a></li>
+          <li><a href="/favorites">Your Favorites</a></li>
+          <li><a href="/about">About Sanix Tool</a></li>
+          <li><a href="/contact">Contact & Feedback</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h5>Legal & Privacy</h5>
         <ul class="footer-links">
-          <li><a href="/tools/pdf/privacy.php">Privacy Policy</a></li>
-          <li><a href="/tools/pdf/terms.php">Terms of Service</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
           <li><a href="/tools/pdf/">Sanix Tool Platform</a></li>
         </ul>
       </div>
