@@ -1,3 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unix Timestamp Converter - Sanix Tool</title>
+  <meta name="description" content="Convert Epoch Unix timestamps in seconds or milliseconds to human-readable UTC and local date formats.">
+  
+  <!-- OpenGraph Metadata -->
+  <meta property="og:title" content="Unix Timestamp Converter - Sanix Tool">
+  <meta property="og:description" content="Convert Epoch Unix timestamps in seconds or milliseconds to human-readable UTC and local date formats.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="/tools/developer/">
+  <meta property="og:image" content="/tools/developer/assets/images/branding/og-preview.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/assets/images/branding/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/assets/images/branding/favicon.png">
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="/assets/css/themes.css?v=1.0.0">
+  <link rel="stylesheet" href="/assets/css/style.css?v=1.0.0">
+  <link rel="stylesheet" href="/assets/css/sani.css?v=1.0.0">
+  <link rel="stylesheet" href="/assets/css/tools.css?v=1.0.0">
+  
+  <!-- Vendor CSS where needed -->
+  <link rel="stylesheet" href="/assets/lib/cropper.min.css">
+
+  <script>
+    window.CSRF_TOKEN = 'c6845750b6c0e14d546076eafddc63683332b0666b8cded62528e439fa88288e';
+    window.BASE_URL = "/";
+    window.showToast = window.showToast || function(msg, type) { console.log("[" + (type||'info') + "] " + msg); };
+    window.trackToolUsage = window.trackToolUsage || function(name) { console.log("Track: " + name); };
+  </script>
+</head>
+<body >
+
+<!-- SANIX TOOL LOADING SCREEN -->
+<div id="sanix-loader">
+  <img src="/assets/images/branding/sanix-logo-mark.svg" alt="Sanix Tool" style="width:70px; height:70px;">
+  <div class="loader-spinner"></div>
+  <p style="margin-top:1rem; color:var(--text-muted); font-weight:600; letter-spacing:0.5px;">Preparing your tools...</p>
+</div>
+
+<nav class="navbar">
+  <div class="container nav-container">
+    <a href="/tools/developer/" class="nav-brand">
+      <img src="/assets/images/branding/sanix-logo.svg" alt="Sanix Tool Logo">
+    </a>
+
+    <ul class="nav-menu">
+      <li><a href="/tools/developer/" class="nav-link">Home</a></li>
+      <li><a href="/tools/developer/tools.php" class="nav-link">All Tools</a></li>
+      <li><a href="/tools/developer/favorites.php" class="nav-link">Favorites ❤️</a></li>
+      <li><a href="/tools/developer/about.php" class="nav-link">About</a></li>
+      <li><a href="/tools/developer/contact.php" class="nav-link">Contact</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="theme-toggle" title="Toggle Light/Dark Theme">☀️</button>
+          </div>
+  </div>
+</nav>
+<main style="flex:1;">
 
 <div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
   <div class="tool-workspace">
@@ -71,3 +135,175 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+</main> <!-- End Main -->
+
+<!-- SANI VIRTUAL ASSISTANT FLOATING WIDGET -->
+<div id="sani-assistant-container" class="sani-floating">
+  <div id="sani-speech-bubble">
+    <div class="sani-speaker-badge">SANI AI</div>
+    <span id="sani-speech-text">Welcome to Sanix Tool! How can I assist you today?</span>
+  </div>
+
+  <div class="sani-avatar-wrapper" onclick="if(window.Sani) window.Sani.say('Click any tool to start! Everything runs super fast.', 'happy');">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%" id="sani-master-svg">
+  <defs>
+    <!-- Hair Gradient -->
+    <linearGradient id="sani-hair-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="60%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+
+    <!-- Headset Neon Glow -->
+    <linearGradient id="sani-neon-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#7f00ff"/>
+    </linearGradient>
+
+    <!-- Eye Glow -->
+    <radialGradient id="sani-eye-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="70%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </radialGradient>
+
+    <!-- Suit Gradient -->
+    <linearGradient id="sani-suit-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <filter id="glow-light" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND HALO -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="url(#sani-neon-grad)" stroke-width="2" opacity="0.4" filter="url(#glow-light)"/>
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#00f2fe" stroke-dasharray="4 8" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- BACK HAIR -->
+  <path d="M 50 80 Q 40 140 60 170 Q 100 185 140 170 Q 160 140 150 80 Z" fill="url(#sani-hair-grad)"/>
+
+  <!-- NECK & SUIT -->
+  <path d="M 85 130 L 115 130 L 122 155 L 78 155 Z" fill="#fbcfe8"/>
+  <path d="M 60 155 Q 100 145 140 155 L 155 200 L 45 200 Z" fill="url(#sani-suit-grad)"/>
+  <!-- Suit Collar Neon Trim -->
+  <path d="M 70 155 Q 100 175 130 155" fill="none" stroke="url(#sani-neon-grad)" stroke-width="3" filter="url(#glow-light)"/>
+  <!-- Sanix Chest Badge -->
+  <polygon points="100,165 106,172 100,179 94,172" fill="#00f2fe" filter="url(#glow-light)"/>
+
+  <!-- FACE BASE -->
+  <path d="M 62 75 Q 100 60 138 75 Q 145 110 100 140 Q 55 110 62 75 Z" fill="#fff1f2"/>
+  <!-- Cheeks Blush -->
+  <ellipse cx="74" cy="108" rx="8" ry="4" fill="#fda4af" opacity="0.5"/>
+  <ellipse cx="126" cy="108" rx="8" ry="4" fill="#fda4af" opacity="0.5"/>
+
+  <!-- FRONT BANGS HAIR -->
+  <path d="M 58 75 Q 80 50 100 70 Q 120 50 142 75 Q 125 60 100 80 Q 75 60 58 75 Z" fill="url(#sani-hair-grad)"/>
+
+  <!-- CYBER CAT HEADSET (Left & Right Ears) -->
+  <!-- Left Ear -->
+  <polygon points="45,65 30,25 68,48" fill="#1e293b" stroke="url(#sani-neon-grad)" stroke-width="2"/>
+  <polygon points="48,60 36,32 64,48" fill="#00f2fe" opacity="0.7" filter="url(#glow-light)"/>
+  <!-- Right Ear -->
+  <polygon points="155,65 170,25 132,48" fill="#1e293b" stroke="url(#sani-neon-grad)" stroke-width="2"/>
+  <polygon points="152,60 164,32 136,48" fill="#00f2fe" opacity="0.7" filter="url(#glow-light)"/>
+  <!-- Headset Band -->
+  <path d="M 45 60 Q 100 30 155 60" fill="none" stroke="#334155" stroke-width="5"/>
+  <path d="M 45 60 Q 100 30 155 60" fill="none" stroke="#00f2fe" stroke-width="2" filter="url(#glow-light)"/>
+
+  <!-- EYEBROWS (Interactive via JS) -->
+  <path id="sani-eyebrow-left" d="M 70 88 Q 80 84 90 88" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+  <path id="sani-eyebrow-right" d="M 110 88 Q 120 84 130 88" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- EYES CONTAINER -->
+  <g id="sani-eyes-group">
+    <!-- Left Eye Socket -->
+    <ellipse cx="80" cy="100" rx="12" ry="14" fill="#ffffff" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Right Eye Socket -->
+    <ellipse cx="120" cy="100" rx="12" ry="14" fill="#ffffff" stroke="#1e293b" stroke-width="1.5"/>
+
+    <!-- Left Pupil (Trackable) -->
+    <g id="sani-pupil-left">
+      <ellipse cx="80" cy="100" rx="7" ry="9" fill="url(#sani-eye-grad)"/>
+      <circle cx="78" cy="96" r="2.5" fill="#ffffff"/>
+      <circle cx="82" cy="103" r="1.2" fill="#ffffff"/>
+    </g>
+
+    <!-- Right Pupil (Trackable) -->
+    <g id="sani-pupil-right">
+      <ellipse cx="120" cy="100" rx="7" ry="9" fill="url(#sani-eye-grad)"/>
+      <circle cx="118" cy="96" r="2.5" fill="#ffffff"/>
+      <circle cx="122" cy="103" r="1.2" fill="#ffffff"/>
+    </g>
+  </g>
+
+  <!-- MOUTH (Interactive Path via JS) -->
+  <path id="sani-mouth" d="M 94 122 Q 100 126 106 122" fill="none" stroke="#e11d48" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- NOSE -->
+  <circle cx="100" cy="113" r="1" fill="#cbd5e1"/>
+</svg>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="/assets/images/branding/sanix-logo.svg" alt="Sanix Tool">
+        <p>One Platform. Every Tool. Privacy-first online utilities running directly in your browser with high speed and zero data collection.</p>
+      </div>
+
+      <div class="footer-col">
+        <h5>Tool Categories</h5>
+        <ul class="footer-links">
+          <li><a href="/tools/developer/tools.php?category=image">Image Tools</a></li>
+          <li><a href="/tools/developer/tools.php?category=pdf">PDF Tools</a></li>
+          <li><a href="/tools/developer/tools.php?category=text">Text Utilities</a></li>
+          <li><a href="/tools/developer/tools.php?category=developer">Developer Tools</a></li>
+          <li><a href="/tools/developer/tools.php?category=calculator">Calculators</a></li>
+          <li><a href="/tools/developer/tools.php?category=file">File Utilities</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Quick Links</h5>
+        <ul class="footer-links">
+          <li><a href="/tools/developer/tools.php">All Tools Directory</a></li>
+          <li><a href="/tools/developer/favorites.php">Your Favorites</a></li>
+          <li><a href="/tools/developer/about.php">About Sanix Tool</a></li>
+          <li><a href="/tools/developer/contact.php">Contact & Feedback</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Legal & Privacy</h5>
+        <ul class="footer-links">
+          <li><a href="/tools/developer/privacy.php">Privacy Policy</a></li>
+          <li><a href="/tools/developer/terms.php">Terms of Service</a></li>
+          <li><a href="/tools/developer/">Sanix Tool Platform</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 <strong>SANIX TOOL</strong>. Designed & Built for High Performance. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- JavaScript Scripts -->
+<script src="/assets/js/theme.js?v=1.0.0"></script>
+<script src="/assets/js/toast.js?v=1.0.0"></script>
+<script src="/assets/js/sani.js?v=1.0.0"></script>
+<script src="/assets/js/favorites.js?v=1.0.0"></script>
+<script src="/assets/js/search.js?v=1.0.0"></script>
+<script src="/assets/js/app.js?v=1.0.0"></script>
+</body>
+</html>
