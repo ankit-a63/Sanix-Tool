@@ -43,7 +43,7 @@
     </div>
 
     <div class="footer-bottom">
-      <p>&copy; <?= date('Y') ?> <strong>SANIX TOOL</strong>. Designed & Built for High Performance. All rights reserved.</p>
+      <p>&copy; <?= date('Y') ?> <strong>SANIX TOOL</strong>. Designed & Built for High Performance. Designed & Developed with ❤️ by <strong>Sanni Singh</strong>. All rights reserved.</p>
     </div>
   </div>
 </footer>
