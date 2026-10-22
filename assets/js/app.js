@@ -1,6 +1,6 @@
 /**
  * SANIX TOOL - Global Main Application Scripts
- * Designed & Developed with ❤️ by Sanni Singh
+ * Designed & Developed with ❤️ by Ankit Singh
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // 3. Thank You Pop-up Modal (Designed & Developed by Sanni Singh - Auto Close in 5 Seconds)
+  // 3. Thank You Pop-up Modal (Designed & Developed by Ankit Singh - Auto Close in 5 Seconds)
   window.thankYouTimer = null;
 
   window.showThankYouModal = function(actionName, customMsg) {
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <h3 class="sanix-modal-title">Thank You for using Sanix Tool!</h3>
           <p class="sanix-modal-body" id="sanix-modal-msg">${customMsg || "Your file has been downloaded successfully. 100% free, fast & private."}</p>
           <div class="sanix-modal-author">
-            ✨ Designed & Developed with ❤️ by <strong>Sanni Singh</strong>
+            ✨ Designed & Developed with ❤️ by <strong>Ankit Singh</strong>
           </div>
           <button class="btn btn-primary sanix-modal-close-btn" onclick="window.closeThankYouModal()">Awesome, Got it!</button>
         </div>
