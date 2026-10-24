@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/assets/lib/cropper.min.css">
 
   <script>
-    window.CSRF_TOKEN = '9220c22bd87a73f6b1635d2415e685c3caf35ba77012a5d2d745d9200d477b64';
+    window.CSRF_TOKEN = '3369ac0bd5f7c5968b0d00884eff9be38dad35c77ad5e307cb6efd563260e73a';
     window.BASE_URL = "/";
     window.showToast = window.showToast || function(msg, type) { console.log("[" + (type||'info') + "] " + msg); };
     window.trackToolUsage = window.trackToolUsage || function(name) { console.log("Track: " + name); };
@@ -66,7 +66,7 @@
 <div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
   <div style="text-align: center; margin-bottom: 2.5rem;">
     <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Your Favorite Tools ❤️</h1>
-    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; width: 100%; box-sizing: border-box; margin: 0 auto;">
+    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
       Quick access to the tools you use most frequently.
     </p>
   </div>
@@ -75,7 +75,7 @@
     <!-- Rendered dynamically via JS or DB -->
   </div>
 
-  <div id="no-favs-msg" class="card" style="display:none; text-align:center; padding:3rem 1rem; max-width: 500px; width: 100%; box-sizing: border-box; margin:2rem auto;">
+  <div id="no-favs-msg" class="card" style="display:none; text-align:center; padding:3rem 1rem; max-width:500px; margin:2rem auto;">
     <div style="font-size:3rem; margin-bottom:1rem;">🤍</div>
     <h3>No Favorites Saved Yet</h3>
     <p style="color:var(--text-muted); margin-top:0.5rem; margin-bottom:1.5rem;">Click the heart icon on any tool card to add it to your personal favorites!</p>
@@ -153,6 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </main> <!-- End Main -->
+
+
 
 <!-- SANI VIRTUAL ASSISTANT FLOATING WIDGET -->
 <div id="sani-assistant-container" class="sani-floating">
@@ -269,58 +271,114 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
+
 <footer class="footer">
+
   <div class="container">
+
     <div class="footer-grid">
+
       <div class="footer-brand">
+
         <img src="/assets/images/branding/sanix-logo.svg" alt="Sanix Tool">
+
         <p>One Platform. Every Tool. Privacy-first online utilities running directly in your browser with high speed and zero data collection.</p>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Tool Categories</h5>
+
         <ul class="footer-links">
+
           <li><a href="/?category=image">Image Tools</a></li>
+
           <li><a href="/?category=pdf">PDF Tools</a></li>
+
           <li><a href="/?category=text">Text Utilities</a></li>
+
           <li><a href="/?category=developer">Developer Tools</a></li>
+
           <li><a href="/?category=calculator">Calculators</a></li>
+
           <li><a href="/?category=file">File Utilities</a></li>
+
         </ul>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Quick Links</h5>
+
         <ul class="footer-links">
+
           <li><a href="/">All Tools Directory</a></li>
+
           <li><a href="/favorites">Your Favorites</a></li>
+
           <li><a href="/about">About Sanix Tool</a></li>
+
           <li><a href="/contact">Contact & Feedback</a></li>
+
         </ul>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Legal & Privacy</h5>
+
         <ul class="footer-links">
+
           <li><a href="/privacy">Privacy Policy</a></li>
+
           <li><a href="/terms">Terms of Service</a></li>
+
           <li><a href="/">Sanix Tool Platform</a></li>
+
         </ul>
+
       </div>
+
     </div>
+
+
 
     <div class="footer-bottom">
+
       <p>&copy; 2026 <strong>SANIX TOOL</strong>. Designed & Built for High Performance. Designed & Developed with ❤️ by <strong>Ankit Singh</strong>. All rights reserved.</p>
+
     </div>
+
   </div>
+
 </footer>
 
+
+
 <!-- JavaScript Scripts -->
+
 <script src="/assets/js/theme.js?v=1.0.0"></script>
+
 <script src="/assets/js/toast.js?v=1.0.0"></script>
+
 <script src="/assets/js/sani.js?v=1.0.0"></script>
+
 <script src="/assets/js/favorites.js?v=1.0.0"></script>
+
 <script src="/assets/js/search.js?v=1.0.0"></script>
+
 <script src="/assets/js/app.js?v=1.0.0"></script>
+
 </body>
+
 </html>
+

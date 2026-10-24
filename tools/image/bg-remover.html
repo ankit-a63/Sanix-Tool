@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/assets/lib/cropper.min.css">
 
   <script>
-    window.CSRF_TOKEN = '2e90bc097dfd6056b9df84b6b761cbcb6c54d3f998c4f9fc67b26035899d520d';
+    window.CSRF_TOKEN = '0a38fff4298bbc8b13a33dd9e56bf0a33fb072b6ee0b1d0e21e38cd5592d8bbe';
     window.BASE_URL = "/";
     window.showToast = window.showToast || function(msg, type) { console.log("[" + (type||'info') + "] " + msg); };
     window.trackToolUsage = window.trackToolUsage || function(name) { console.log("Track: " + name); };
@@ -65,7 +65,7 @@
 
 <style>
 .bg-remover-container {
-  max-width: 960px; width: 100%; box-sizing: border-box;
+  max-width: 960px;
   margin: 0 auto;
   background: var(--surface, #1e293b);
   border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
@@ -186,14 +186,14 @@ canvas#bgEditorCanvas {
         <button type="button" class="btn btn-secondary" id="bgChangeImageBtn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Change Image</button>
       </div>
 
-      <div class="tool-card-preview-grid">
+      <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: center;">
         <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 12px; border: 1px solid var(--surface-border);">
           <img id="bgReadyPreview" src="" alt="Source Preview" style="max-width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px;">
         </div>
         <div>
           <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">FILE NAME</small>
           <h4 id="bgReadyFileName" style="font-size: 1.1rem; word-break: break-all; color: var(--text-main); margin: 0 0 0.5rem 0;">filename.jpg</h4>
-          <div class="tool-meta-stats">
+          <div style="display: flex; gap: 2rem;">
             <div>
               <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">FILE SIZE</small>
               <div id="bgReadyFileSize" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">0 MB</div>
@@ -761,6 +761,8 @@ canvas#bgEditorCanvas {
 
 </main> <!-- End Main -->
 
+
+
 <!-- SANI VIRTUAL ASSISTANT FLOATING WIDGET -->
 <div id="sani-assistant-container" class="sani-floating">
   <div id="sani-speech-bubble">
@@ -876,58 +878,114 @@ canvas#bgEditorCanvas {
   </div>
 </div>
 
+
 <footer class="footer">
+
   <div class="container">
+
     <div class="footer-grid">
+
       <div class="footer-brand">
+
         <img src="/assets/images/branding/sanix-logo.svg" alt="Sanix Tool">
+
         <p>One Platform. Every Tool. Privacy-first online utilities running directly in your browser with high speed and zero data collection.</p>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Tool Categories</h5>
+
         <ul class="footer-links">
+
           <li><a href="/tools?category=image">Image Tools</a></li>
+
           <li><a href="/tools?category=pdf">PDF Tools</a></li>
+
           <li><a href="/tools?category=text">Text Utilities</a></li>
+
           <li><a href="/tools?category=developer">Developer Tools</a></li>
+
           <li><a href="/tools?category=calculator">Calculators</a></li>
+
           <li><a href="/tools?category=file">File Utilities</a></li>
+
         </ul>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Quick Links</h5>
+
         <ul class="footer-links">
+
           <li><a href="/tools">All Tools Directory</a></li>
+
           <li><a href="/favorites">Your Favorites</a></li>
+
           <li><a href="/about">About Sanix Tool</a></li>
+
           <li><a href="/contact">Contact & Feedback</a></li>
+
         </ul>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Legal & Privacy</h5>
+
         <ul class="footer-links">
+
           <li><a href="/privacy">Privacy Policy</a></li>
+
           <li><a href="/terms">Terms of Service</a></li>
-          <li><a href="/tools/image/">Sanix Tool Platform</a></li>
+
+          <li><a href="/">Sanix Tool Platform</a></li>
+
         </ul>
+
       </div>
+
     </div>
+
+
 
     <div class="footer-bottom">
+
       <p>&copy; 2026 <strong>SANIX TOOL</strong>. Designed & Built for High Performance. Designed & Developed with ❤️ by <strong>Ankit Singh</strong>. All rights reserved.</p>
+
     </div>
+
   </div>
+
 </footer>
 
+
+
 <!-- JavaScript Scripts -->
+
 <script src="/assets/js/theme.js?v=1.0.0"></script>
+
 <script src="/assets/js/toast.js?v=1.0.0"></script>
+
 <script src="/assets/js/sani.js?v=1.0.0"></script>
+
 <script src="/assets/js/favorites.js?v=1.0.0"></script>
+
 <script src="/assets/js/search.js?v=1.0.0"></script>
+
 <script src="/assets/js/app.js?v=1.0.0"></script>
+
 </body>
+
 </html>
+

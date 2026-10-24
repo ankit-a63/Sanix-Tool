@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ID &amp; Passport Photo Maker - Sanix Tool</title>
-  <meta name="description" content="Create passport photos, visa photos, and ID photos with custom dimensions, background colors, and printable A4 sheets.">
+  <title>Passport Size Photo Maker - Create, Crop, Change Clothes &amp; Background</title>
+  <meta name="description" content="Online Passport Photo Maker like Pi7: Crop face, change background color, add formal suits/clothes, compress to 20KB/50KB, and print on A4 &amp; 4x6 sheets.">
   
   <!-- OpenGraph Metadata -->
-  <meta property="og:title" content="ID &amp; Passport Photo Maker - Sanix Tool">
-  <meta property="og:description" content="Create passport photos, visa photos, and ID photos with custom dimensions, background colors, and printable A4 sheets.">
+  <meta property="og:title" content="Passport Size Photo Maker - Create, Crop, Change Clothes &amp; Background">
+  <meta property="og:description" content="Online Passport Photo Maker like Pi7: Crop face, change background color, add formal suits/clothes, compress to 20KB/50KB, and print on A4 &amp; 4x6 sheets.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="/tools/image/">
   <meta property="og:image" content="/tools/image/assets/images/branding/og-preview.png">
@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/assets/lib/cropper.min.css">
 
   <script>
-    window.CSRF_TOKEN = 'c57fd2df80cb3af1524c7964a1d22d34d9732dad1139c2d7c1e2857edbf4f11b';
+    window.CSRF_TOKEN = '3d3e223f5baa146283c5129c06ddd6f7f7d117bf3930fa6de2d280ac75a55953';
     window.BASE_URL = "/";
     window.showToast = window.showToast || function(msg, type) { console.log("[" + (type||'info') + "] " + msg); };
     window.trackToolUsage = window.trackToolUsage || function(name) { console.log("Track: " + name); };
@@ -63,717 +63,3272 @@
 </nav>
 <main style="flex:1;">
 
+
+<!-- Include Cropper.js & PDF-Lib CSS/JS -->
+
+<link rel="stylesheet" href="/assets/lib/cropper.min.css">
+
+<script src="/assets/lib/cropper.min.js"></script>
+
+<script src="/assets/lib/pdf-lib.min.js"></script>
+
+
+
 <style>
-.id-photo-container {
-  max-width: 980px; width: 100%; box-sizing: border-box;
+
+/* ==========================================================================
+
+   SANIX TOOL - PI7-STYLE PASSPORT & ID PHOTO STUDIO
+
+   ========================================================================== */
+
+
+
+.passport-studio-container {
+
+  max-width: 1040px;
+
   margin: 0 auto;
+
   background: var(--surface, #1e293b);
+
   border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+
   border-radius: 20px;
+
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+  box-shadow: 0 10px 35px rgba(0,0,0,0.35);
+
+  box-sizing: border-box;
+
 }
 
-.id-dropzone {
-  border: 2px dashed var(--primary, #00f2fe);
-  border-radius: 16px;
-  padding: 3.5rem 2rem;
-  text-align: center;
-  background: var(--input-bg, #0f172a);
-  cursor: pointer;
-  position: relative;
-  transition: all 0.25s ease;
-}
 
-.id-dropzone:hover, .id-dropzone.dragover {
-  background: rgba(0, 242, 254, 0.08);
-  border-color: #00c6ff;
-  box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
-}
 
-.id-card {
-  background: var(--input-bg, #0f172a);
+/* Nav Steps Wizard (Pi7 Style) */
+
+.passport-steps-nav {
+
+  display: flex;
+
+  background: rgba(15, 23, 42, 0.6);
+
   border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-top: 1.5rem;
+
+  border-radius: 14px;
+
+  padding: 0.4rem;
+
+  margin-bottom: 2rem;
+
+  gap: 0.4rem;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+
 }
 
-.photo-preset-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
+.passport-steps-nav::-webkit-scrollbar { display: none; }
 
-.photo-preset-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--surface-border);
-  border-radius: 12px;
-  padding: 0.85rem;
+
+
+.passport-step-btn {
+
+  flex: 1;
+
+  min-width: 120px;
+
+  padding: 0.75rem 0.6rem;
+
+  border-radius: 10px;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--text-muted, #94a3b8);
+
+  font-weight: 700;
+
+  font-size: 0.9rem;
+
   cursor: pointer;
-  transition: all 0.2s ease;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 0.5rem;
+
+  transition: all 0.25s ease;
+
+  white-space: nowrap;
+
 }
 
-.photo-preset-card:hover, .photo-preset-card.active {
-  background: rgba(0, 242, 254, 0.12);
-  border-color: var(--primary);
-  transform: translateY(-2px);
+
+
+.passport-step-btn i {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 24px;
+
+  height: 24px;
+
+  border-radius: 50%;
+
+  background: rgba(255,255,255,0.08);
+
+  font-size: 0.75rem;
+
+  font-style: normal;
+
 }
 
-.editor-preview-container {
+
+
+.passport-step-btn:hover {
+
+  color: var(--text-main, #f8fafc);
+
+  background: rgba(255,255,255,0.04);
+
+}
+
+
+
+.passport-step-btn.active {
+
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.18), rgba(0, 198, 255, 0.12));
+
+  color: var(--primary, #00f2fe);
+
+  border: 1px solid rgba(0, 242, 254, 0.35);
+
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+
+}
+
+
+
+.passport-step-btn.active i {
+
+  background: var(--primary, #00f2fe);
+
+  color: #040914;
+
+  font-weight: 900;
+
+}
+
+
+
+/* Upload Dropzone */
+
+.passport-dropzone {
+
+  border: 2px dashed var(--primary, #00f2fe);
+
+  border-radius: 16px;
+
+  padding: 3.5rem 2rem;
+
+  text-align: center;
+
+  background: var(--input-bg, #0f172a);
+
+  cursor: pointer;
+
+  position: relative;
+
+  transition: all 0.25s ease;
+
+}
+
+.passport-dropzone:hover {
+
+  background: rgba(0, 242, 254, 0.08);
+
+  border-color: #00c6ff;
+
+  box-shadow: 0 0 25px rgba(0, 242, 254, 0.25);
+
+}
+
+
+
+/* Studio Cards */
+
+.studio-panel {
+
+  display: none;
+
+  animation: fadeIn 0.3s ease;
+
+}
+
+.studio-panel.active {
+
+  display: block;
+
+}
+
+
+
+/* Country Size Presets Grid */
+
+.country-preset-grid {
+
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1.5rem;
-  align-items: start;
+
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+
+  gap: 1rem;
+
+  margin: 1.25rem 0;
+
 }
+
+
+
+.country-preset-card {
+
+  background: rgba(255,255,255,0.03);
+
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+
+  border-radius: 14px;
+
+  padding: 1rem;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+  position: relative;
+
+}
+
+.country-preset-card:hover {
+
+  border-color: rgba(0, 242, 254, 0.4);
+
+  transform: translateY(-2px);
+
+  background: rgba(255,255,255,0.05);
+
+}
+
+.country-preset-card.active {
+
+  border-color: var(--primary, #00f2fe);
+
+  background: rgba(0, 242, 254, 0.12);
+
+  box-shadow: 0 4px 20px rgba(0, 242, 254, 0.15);
+
+}
+
+.country-preset-title {
+
+  font-size: 1rem;
+
+  font-weight: 800;
+
+  color: var(--text-main, #f8fafc);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.4rem;
+
+}
+
+.country-preset-dim {
+
+  font-size: 0.9rem;
+
+  color: var(--primary, #00f2fe);
+
+  font-weight: 700;
+
+  margin: 0.25rem 0;
+
+}
+
+.country-preset-desc {
+
+  font-size: 0.78rem;
+
+  color: var(--text-muted, #94a3b8);
+
+  line-height: 1.3;
+
+}
+
+
+
+/* Cropper Container */
+
+.cropper-stage {
+
+  max-width: 100%;
+
+  height: 440px;
+
+  background: #020617;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+
+}
+
+
+
+.cropper-stage img {
+
+  max-width: 100%;
+
+  max-height: 100%;
+
+}
+
+
+
+/* Face Biometric Guide Overlay */
+
+.face-guide-overlay {
+
+  position: absolute;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  display: none;
+
+  align-items: center;
+
+  justify-content: center;
+
+  z-index: 5;
+
+}
+
+.face-guide-overlay.active {
+
+  display: flex;
+
+}
+
+.face-guide-oval {
+
+  width: 160px;
+
+  height: 220px;
+
+  border: 2px dashed rgba(0, 242, 254, 0.85);
+
+  border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%;
+
+  position: relative;
+
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.35);
+
+}
+
+.face-guide-eye-line {
+
+  position: absolute;
+
+  top: 42%;
+
+  left: 0;
+
+  right: 0;
+
+  border-top: 1px dashed rgba(255, 255, 255, 0.6);
+
+}
+
+.face-guide-chin-line {
+
+  position: absolute;
+
+  bottom: 0%;
+
+  left: 15%;
+
+  right: 15%;
+
+  border-top: 2px solid rgba(0, 242, 254, 0.85);
+
+}
+
+
+
+/* Crop Controls Toolbar */
+
+.crop-toolbar {
+
+  display: flex;
+
+  gap: 0.5rem;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  margin-top: 1rem;
+
+}
+
+
+
+/* Color Swatches */
+
+.color-swatch-btn {
+
+  width: 44px;
+
+  height: 44px;
+
+  border-radius: 10px;
+
+  border: 2px solid rgba(255,255,255,0.2);
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+  position: relative;
+
+}
+
+.color-swatch-btn:hover, .color-swatch-btn.active {
+
+  transform: scale(1.12);
+
+  border-color: var(--primary, #00f2fe);
+
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+
+}
+
+
+
+/* Attire Grid */
+
+.attire-category-tabs {
+
+  display: flex;
+
+  gap: 0.5rem;
+
+  margin-bottom: 1rem;
+
+  flex-wrap: wrap;
+
+}
+
+.attire-grid {
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+
+  gap: 0.75rem;
+
+  max-height: 240px;
+
+  overflow-y: auto;
+
+  padding: 0.5rem;
+
+  background: rgba(0,0,0,0.3);
+
+  border-radius: 12px;
+
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+
+}
+
+.attire-card {
+
+  background: rgba(255,255,255,0.03);
+
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+
+  border-radius: 10px;
+
+  padding: 0.5rem;
+
+  cursor: pointer;
+
+  text-align: center;
+
+  transition: all 0.2s ease;
+
+}
+
+.attire-card:hover, .attire-card.active {
+
+  border-color: var(--primary, #00f2fe);
+
+  background: rgba(0, 242, 254, 0.12);
+
+  transform: translateY(-2px);
+
+}
+
+.attire-card img, .attire-card svg {
+
+  width: 100%;
+
+  height: 90px;
+
+  object-fit: contain;
+
+}
+
+.attire-card-title {
+
+  font-size: 0.78rem;
+
+  font-weight: 700;
+
+  margin-top: 0.4rem;
+
+  color: var(--text-main, #f8fafc);
+
+}
+
+
+
+/* Target Size Quick Pills */
+
+.target-size-pills {
+
+  display: flex;
+
+  gap: 0.5rem;
+
+  flex-wrap: wrap;
+
+  margin-top: 0.5rem;
+
+}
+
+.target-size-pill {
+
+  padding: 0.4rem 0.85rem;
+
+  border-radius: 8px;
+
+  background: rgba(255,255,255,0.05);
+
+  border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+
+  color: var(--text-muted, #94a3b8);
+
+  font-size: 0.85rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+}
+
+.target-size-pill:hover, .target-size-pill.active {
+
+  background: rgba(0, 242, 254, 0.15);
+
+  border-color: var(--primary, #00f2fe);
+
+  color: var(--primary, #00f2fe);
+
+}
+
+
+
+/* Navigation Action Bar */
+
+.step-nav-actions {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-top: 2rem;
+
+  padding-top: 1.25rem;
+
+  border-top: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+
+  gap: 1rem;
+
+  flex-wrap: wrap;
+
+}
+
+
 
 @media (max-width: 768px) {
-  .editor-preview-container {
-    grid-template-columns: 1fr;
-  }
+
+  .passport-studio-container { padding: 1.25rem 1rem !important; }
+
+  .cropper-stage { height: 320px; }
+
+  .step-nav-actions button { width: 100% !important; }
+
 }
 
-.single-photo-box {
-  background: #000;
-  border: 2px solid var(--primary);
-  border-radius: 12px;
-  padding: 0.75rem;
-  text-align: center;
-}
-
-canvas#singlePhotoCanvas {
-  max-width: 100%;
-  max-height: 320px;
-  border-radius: 6px;
-}
-
-.a4-preview-box {
-  background: #ffffff;
-  border: 2px solid var(--surface-border);
-  border-radius: 8px;
-  padding: 1rem;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  overflow: auto;
-  max-height: 480px;
-}
-
-canvas#a4Canvas {
-  max-width: 100%;
-  height: auto;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
 </style>
 
-<div class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
-  <div class="id-photo-container">
-    
+
+
+<div class="container" style="padding-top: 1.75rem; padding-bottom: 4rem;">
+
+  <div class="passport-studio-container">
+
+
+
     <!-- TOOL HEADER -->
+
     <div class="tool-header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--surface-border);">
+
       <div class="tool-header-info" style="display: flex; align-items: center; gap: 1rem;">
-        <div class="tool-icon" style="font-size: 2.2rem;">🪪</div>
+
+        <div class="tool-icon" style="font-size: 2.2rem;">📸</div>
+
         <div>
-          <h1 class="tool-header-title" style="font-size: 1.6rem; margin: 0;">ID & Passport Photo Maker</h1>
-          <p class="tool-header-desc" style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">Create official passport photos, visa photos, and ID cards with background replacement and printable A4 sheets.</p>
-        </div>
-      </div>
-    </div>
 
-    <!-- PRIVACY NOTIFICATION -->
-    <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(0, 242, 254, 0.05); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.15);">
-      🔒 <span>Your photos are processed 100% locally in your browser. Complete privacy guaranteed.</span>
-    </div>
+          <h1 class="tool-header-title" style="font-size: 1.6rem; margin: 0;">Passport Size Photo Maker</h1>
 
-    <!-- 1. DROPZONE -->
-    <div id="idDropzone" class="id-dropzone">
-      <div style="font-size: 3.2rem; margin-bottom: 0.5rem;">📁</div>
-      <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Drop your photo here</div>
-      <div style="margin: 0.85rem 0;">
-        <button type="button" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-size: 1.05rem; pointer-events: none;">[ Browse Photo ]</button>
-      </div>
-      <div style="font-size: 0.88rem; color: var(--text-muted);">Supported Formats: <strong>JPG • PNG • WEBP</strong></div>
-      <input type="file" id="idFileInput" accept="image/jpeg,image/png,image/webp" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 20;" onchange="if(this.files && this.files[0] && window.handleIdFile) window.handleIdFile(this.files[0]);">
-    </div>
+          <p class="tool-header-desc" style="font-size: 0.95rem; color: var(--text-muted); margin: 0;">Complete Pi7-Style Suite: Biometric face crop, formal suits & attire, background color replacer, 50KB compression & printable sheets.</p>
 
-    <!-- 2. READING STATE -->
-    <div id="idReading" class="id-card" style="display: none; text-align: center; padding: 2.5rem 1.5rem;">
-      <span class="btn btn-secondary" style="pointer-events: none; margin-bottom: 0.75rem;">⚡ Reading photo...</span>
-      <h3 id="idReadingFileName" style="font-size: 1.15rem; color: var(--text-main); word-break: break-all;">photo.jpg</h3>
-      <small id="idReadingFileSize" style="color: var(--text-muted);">Calculating size...</small>
-      <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; margin: 1.25rem 0 0.5rem 0;">
-        <div id="idReadingProgressFill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00f2fe, #00c6ff); border-radius: 999px; transition: width 0.15s ease;"></div>
-      </div>
-      <div id="idReadingPercentText" style="font-size: 0.95rem; font-weight: 800; color: var(--primary);">0%</div>
-    </div>
-
-    <!-- 3. FILE READY STATE -->
-    <div id="idReady" class="id-card" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
-        <span style="color: #10b981; font-weight: 800; font-size: 0.9rem;">✓ Photo Ready</span>
-        <button type="button" class="btn btn-secondary" id="idChangePhotoBtn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Change Photo</button>
-      </div>
-
-      <div class="tool-card-preview-grid">
-        <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 0.75rem; border-radius: 12px; border: 1px solid var(--surface-border);">
-          <img id="idReadyPreview" src="" alt="Selected Photo" style="max-width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px;">
-        </div>
-        <div>
-          <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">FILE NAME</small>
-          <h4 id="idReadyFileName" style="font-size: 1.1rem; word-break: break-all; color: var(--text-main); margin: 0 0 0.5rem 0;">filename.jpg</h4>
-          <div class="tool-meta-stats">
-            <div>
-              <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">FILE SIZE</small>
-              <div id="idReadyFileSize" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">0 MB</div>
-            </div>
-            <div>
-              <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700;">DIMENSIONS</small>
-              <div id="idReadyDimensions" style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">0 × 0 px</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button type="button" id="idProceedBtn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 1rem; font-size: 1.15rem; font-weight: 800;">
-        ➜ PROCEED TO PASSPORT & ID EDITOR
-      </button>
-    </div>
-
-    <!-- 4. EDITOR & A4 SHEET STUDIO -->
-    <div id="idEditorStudio" class="id-card" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
-        <h3 style="font-size: 1.15rem; color: var(--primary); margin: 0;">1. Choose Document Type & Dimensions</h3>
-        <button type="button" class="btn btn-secondary" id="idResetAllBtn" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">↻ Start Over</button>
-      </div>
-
-      <!-- DOCUMENT PRESETS -->
-      <div class="photo-preset-grid">
-        <div class="photo-preset-card active" data-idpreset="passport-3545">
-          <div style="font-weight: 800; color: var(--text-main);">Passport Photo</div>
-          <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">35 × 45 mm</div>
-          <small style="color: var(--text-muted); font-size: 0.7rem;">Indian / Standard Passport</small>
         </div>
 
-        <div class="photo-preset-card" data-idpreset="visa-22">
-          <div style="font-weight: 800; color: var(--text-main);">Visa Photo</div>
-          <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">2 × 2 inch (51 × 51 mm)</div>
-          <small style="color: var(--text-muted); font-size: 0.7rem;">US / Schengen Visa</small>
-        </div>
-
-        <div class="photo-preset-card" data-idpreset="id-card">
-          <div style="font-weight: 800; color: var(--text-main);">ID / Stamp Photo</div>
-          <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">25 × 35 mm</div>
-          <small style="color: var(--text-muted); font-size: 0.7rem;">Student / Employee ID</small>
-        </div>
-
-        <div class="photo-preset-card" data-idpreset="custom-id">
-          <div style="font-weight: 800; color: var(--text-main);">Custom Size</div>
-          <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">Manual W × H</div>
-          <small style="color: var(--text-muted); font-size: 0.7rem;">Configurable Dimensions</small>
-        </div>
-      </div>
-
-      <!-- CUSTOM DIMENSIONS ROW -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px;">
-        <div class="form-group" style="margin: 0;">
-          <label style="font-weight: 600; font-size: 0.85rem;">Width</label>
-          <input type="number" id="idWidthInput" value="35" class="form-control">
-        </div>
-        <div class="form-group" style="margin: 0;">
-          <label style="font-weight: 600; font-size: 0.85rem;">Height</label>
-          <input type="number" id="idHeightInput" value="45" class="form-control">
-        </div>
-        <div class="form-group" style="margin: 0;">
-          <label style="font-weight: 600; font-size: 0.85rem;">Unit</label>
-          <select id="idUnitSelect" class="form-control">
-            <option value="mm" selected>Millimeters (mm)</option>
-            <option value="inch">Inches (in)</option>
-            <option value="px">Pixels (px)</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin: 0;">
-          <label style="font-weight: 600; font-size: 0.85rem;">Print DPI</label>
-          <select id="idDpiSelect" class="form-control">
-            <option value="150">150 DPI</option>
-            <option value="300" selected>300 DPI (Official)</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- EDITOR PREVIEW & CONTROLS -->
-      <h3 style="font-size: 1.15rem; color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">2. Photo Adjustments & Background Color</h3>
-
-      <div class="editor-preview-container">
-        <!-- SINGLE PHOTO CANVAS PREVIEW -->
-        <div class="single-photo-box">
-          <small style="color: var(--primary); font-weight: 700; display: block; margin-bottom: 0.4rem;">SINGLE PHOTO PREVIEW</small>
-          <canvas id="singlePhotoCanvas"></canvas>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;" id="singlePhotoMetricsText">35 × 45 mm (413 × 531 px @ 300 DPI)</div>
-        </div>
-
-        <!-- CONTROLS PANEL -->
-        <div>
-          <!-- BACKGROUND COLOR -->
-          <div style="margin-bottom: 1rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px;">
-            <label style="font-weight: 700; display: block; margin-bottom: 0.5rem; color: var(--text-main);">Background Color:</label>
-            <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
-              <button type="button" class="btn btn-secondary bg-color-btn" data-color="#ffffff" style="background:#ffffff; color:#000; font-weight:800;">White</button>
-              <button type="button" class="btn btn-secondary bg-color-btn" data-color="#3b82f6" style="background:#3b82f6; color:#fff; font-weight:800;">Blue</button>
-              <button type="button" class="btn btn-secondary bg-color-btn" data-color="#ef4444" style="background:#ef4444; color:#fff; font-weight:800;">Red</button>
-              <button type="button" class="btn btn-secondary bg-color-btn" data-color="#000000" style="background:#000000; color:#fff; font-weight:800;">Black</button>
-              <input type="color" id="idBgColorPicker" value="#ffffff" style="height: 36px; width: 50px; padding: 2px; cursor: pointer;">
-            </div>
-          </div>
-
-          <!-- SLIDERS -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px;">
-            <div>
-              <label style="font-weight: 600; font-size: 0.8rem;">Zoom (<span id="idZoomText">100%</span>)</label>
-              <input type="range" id="idZoomRange" min="50" max="250" value="100" class="form-control" style="height: 6px;">
-            </div>
-            <div>
-              <label style="font-weight: 600; font-size: 0.8rem;">Rotate (<span id="idRotText">0°</span>)</label>
-              <input type="range" id="idRotRange" min="-45" max="45" value="0" class="form-control" style="height: 6px;">
-            </div>
-            <div>
-              <label style="font-weight: 600; font-size: 0.8rem;">Position X (<span id="idPosXText">0px</span>)</label>
-              <input type="range" id="idPosXRange" min="-100" max="100" value="0" class="form-control" style="height: 6px;">
-            </div>
-            <div>
-              <label style="font-weight: 600; font-size: 0.8rem;">Position Y (<span id="idPosYText">0px</span>)</label>
-              <input type="range" id="idPosYRange" min="-100" max="100" value="0" class="form-control" style="height: 6px;">
-            </div>
-            <div>
-              <label style="font-weight: 600; font-size: 0.8rem;">Brightness (<span id="idBrightText">0</span>)</label>
-              <input type="range" id="idBrightRange" min="-50" max="50" value="0" class="form-control" style="height: 6px;">
-            </div>
-            <div>
-              <label style="font-weight: 600; font-size: 0.8rem;">Contrast (<span id="idContrastText">0</span>)</label>
-              <input type="range" id="idContrastRange" min="-50" max="50" value="0" class="form-control" style="height: 6px;">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. A4 PRINTABLE SHEET STUDIO -->
-      <h3 style="font-size: 1.15rem; color: var(--primary); margin-top: 2rem; margin-bottom: 1rem;">3. Printable A4 Sheet Generator</h3>
-
-      <div style="background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-          <div class="form-group" style="margin: 0;">
-            <label style="font-weight: 600;">A4 Page Orientation</label>
-            <select id="a4OrientationSelect" class="form-control">
-              <option value="portrait" selected>Portrait (210 × 297 mm)</option>
-              <option value="landscape">Landscape (297 × 210 mm)</option>
-            </select>
-          </div>
-
-          <div class="form-group" style="margin: 0;">
-            <label style="font-weight: 600;">Page Margin (mm)</label>
-            <input type="number" id="a4MarginInput" value="10" min="0" max="30" class="form-control">
-          </div>
-
-          <div class="form-group" style="margin: 0;">
-            <label style="font-weight: 600;">Gap Between Photos (mm)</label>
-            <input type="number" id="a4GapInput" value="4" min="0" max="20" class="form-control">
-          </div>
-
-          <div class="form-group" style="margin: 0;">
-            <label style="font-weight: 600;">Number of Copies (<span id="maxCopiesCalcText">Max 30</span>)</label>
-            <input type="number" id="a4CopiesInput" value="30" min="1" max="100" class="form-control">
-          </div>
-        </div>
-
-        <!-- A4 CANVAS PREVIEW -->
-        <div class="a4-preview-box">
-          <small style="color: #000; font-weight: 800; display: block; margin-bottom: 0.5rem;">REALISTIC A4 PRINT PREVIEW (AUTOMATIC ARRANGEMENT WITH CUT LINES)</small>
-          <canvas id="a4Canvas"></canvas>
-        </div>
-      </div>
-
-      <!-- DOWNLOAD & PRINT BUTTONS -->
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <button type="button" id="downloadSinglePhotoBtn" class="btn btn-primary" style="flex: 1; padding: 0.95rem; font-weight: 800;">
-          ⬇ DOWNLOAD SINGLE PHOTO
-        </button>
-        <button type="button" id="downloadA4ImageBtn" class="btn btn-primary" style="flex: 1; padding: 0.95rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border: none;">
-          📄 DOWNLOAD A4 SHEET (IMAGE)
-        </button>
-        <button type="button" id="printA4Btn" class="btn btn-secondary" style="padding: 0.95rem 1.5rem; font-weight: 800;">
-          🖨️ PRINT A4 SHEET
-        </button>
       </div>
 
     </div>
+
+
+
+    <!-- 0. UPLOAD DROPZONE -->
+
+    <div id="passportUploadView">
+
+      <div class="passport-dropzone" id="passportDropzone">
+
+        <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">📁</div>
+
+        <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">Drop your photo here or Browse</div>
+
+        <div style="margin: 0.85rem 0;">
+
+          <button type="button" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1.05rem; pointer-events: none;">[ Select Image ]</button>
+
+        </div>
+
+        <div style="font-size: 0.88rem; color: var(--text-muted);">Supports: <strong>JPG • PNG • WEBP • HEIC</strong></div>
+
+        <input type="file" id="passportFileInput" accept="image/jpeg,image/png,image/webp" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 20;" onchange="if(this.files && this.files[0] && window.loadPassportPhoto) window.loadPassportPhoto(this.files[0]);">
+
+      </div>
+
+    </div>
+
+
+
+    <!-- MAIN STUDIO WORKSPACE (ACTIVE AFTER UPLOAD) -->
+
+    <div id="passportMainStudio" style="display: none;">
+
+
+
+      <!-- 5 STEPS NAV HEADER (Pi7 STYLE) -->
+
+      <div class="passport-steps-nav">
+
+        <button type="button" class="passport-step-btn active" data-step="size"><i>1</i><span>Size</span></button>
+
+        <button type="button" class="passport-step-btn" data-step="crop"><i>2</i><span>Crop</span></button>
+
+        <button type="button" class="passport-step-btn" data-step="background"><i>3</i><span>Background</span></button>
+
+        <button type="button" class="passport-step-btn" data-step="cloth"><i>4</i><span>Attire & Suits</span></button>
+
+        <button type="button" class="passport-step-btn" data-step="download"><i>5</i><span>Download & Print</span></button>
+
+      </div>
+
+
+
+      <!-- ===================================================================
+
+           STEP 1: SIZE
+
+           =================================================================== -->
+
+      <div class="studio-panel active" id="stepPanelSize">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+
+          <h3 style="font-size: 1.2rem; color: var(--text-main); margin: 0;">Step 1: Select Passport Photo Size</h3>
+
+          <button type="button" class="btn btn-secondary" onclick="window.resetPassportTool()" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Change Image</button>
+
+        </div>
+
+
+
+        <div class="country-preset-grid">
+
+          <!-- India / Europe / UK / Australia -->
+
+          <div class="country-preset-card active" data-preset="india">
+
+            <div class="country-preset-title">🇮🇳 🇪🇺 🇬🇧 India & Europe</div>
+
+            <div class="country-preset-dim">3.5 × 4.5 CM (35 × 45 MM)</div>
+
+            <div class="country-preset-desc">Official Passport, PAN, Visa, SSC, UPSC, Job Exams</div>
+
+          </div>
+
+
+
+          <!-- USA / Philippines / Schengen -->
+
+          <div class="country-preset-card" data-preset="usa">
+
+            <div class="country-preset-title">🇺🇸 🇵🇭 USA & Philippines</div>
+
+            <div class="country-preset-dim">2 × 2 Inch (51 × 51 MM)</div>
+
+            <div class="country-preset-desc">US Visa, US Passport, Green Card, DS-160</div>
+
+          </div>
+
+
+
+          <!-- Canada -->
+
+          <div class="country-preset-card" data-preset="canada">
+
+            <div class="country-preset-title">🇨🇦 Canada Passport</div>
+
+            <div class="country-preset-dim">50 × 70 MM (5 × 7 CM)</div>
+
+            <div class="country-preset-desc">Canadian Passport & PR Card Specification</div>
+
+          </div>
+
+
+
+          <!-- Malaysia / Singapore -->
+
+          <div class="country-preset-card" data-preset="malaysia">
+
+            <div class="country-preset-title">🇲🇾 🇸🇬 Malaysia & SG</div>
+
+            <div class="country-preset-dim">35 × 50 MM (3.5 × 5 CM)</div>
+
+            <div class="country-preset-desc">Malaysia Passport & Singapore ID</div>
+
+          </div>
+
+
+
+          <!-- Japan / China -->
+
+          <div class="country-preset-card" data-preset="japan">
+
+            <div class="country-preset-title">🇯🇵 🇨🇳 Japan & China</div>
+
+            <div class="country-preset-dim">33 × 48 MM (3.3 × 4.8 CM)</div>
+
+            <div class="country-preset-desc">China & Japan Visa / Residence Requirements</div>
+
+          </div>
+
+
+
+          <!-- ID Card / Stamp Size -->
+
+          <div class="country-preset-card" data-preset="idcard">
+
+            <div class="country-preset-title">🪪 Stamp / Student ID</div>
+
+            <div class="country-preset-dim">25 × 35 MM (2.5 × 3.5 CM)</div>
+
+            <div class="country-preset-desc">Student Cards, Driving License, Office Badges</div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- CUSTOM SIZE & DPI CONTROLS -->
+
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--surface-border); border-radius: 14px; padding: 1.25rem; margin-top: 1rem;">
+
+          <h4 style="font-size: 0.95rem; color: var(--primary); margin: 0 0 1rem 0;">⚙️ Custom Dimensions & DPI</h4>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem;">
+
+            <div class="form-group" style="margin: 0;">
+
+              <label style="font-weight: 600; font-size: 0.85rem;">Width</label>
+
+              <input type="number" id="passportCustomW" value="35" step="0.1" class="form-control">
+
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+
+              <label style="font-weight: 600; font-size: 0.85rem;">Height</label>
+
+              <input type="number" id="passportCustomH" value="45" step="0.1" class="form-control">
+
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+
+              <label style="font-weight: 600; font-size: 0.85rem;">Unit</label>
+
+              <select id="passportCustomUnit" class="form-control">
+
+                <option value="mm" selected>Millimeters (MM)</option>
+
+                <option value="cm">Centimeters (CM)</option>
+
+                <option value="in">Inches (IN)</option>
+
+                <option value="px">Pixels (PX)</option>
+
+              </select>
+
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+
+              <label style="font-weight: 600; font-size: 0.85rem;">Print DPI</label>
+
+              <select id="passportCustomDpi" class="form-control">
+
+                <option value="300" selected>300 DPI (Official Standard)</option>
+
+                <option value="600">600 DPI (High Definition)</option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="step-nav-actions">
+
+          <div style="font-size: 0.9rem; color: var(--text-muted);">
+
+            Active Dimension: <strong id="activeDimLabel" style="color: var(--primary);">35 × 45 mm (413 × 531 px @ 300 DPI)</strong>
+
+          </div>
+
+          <button type="button" class="btn btn-primary" onclick="window.goToStep('crop')" style="padding: 0.75rem 2rem; font-weight: 800;">
+
+            Next: Crop Face ➜
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ===================================================================
+
+           STEP 2: CROP FACE (WITH CROPPER.JS & BIOMETRIC FACE GUIDE)
+
+           =================================================================== -->
+
+      <div class="studio-panel" id="stepPanelCrop">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+
+          <h3 style="font-size: 1.2rem; color: var(--text-main); margin: 0;">Step 2: Crop Face to Official Ratio</h3>
+
+          <div style="display: flex; gap: 0.5rem;">
+
+            <button type="button" class="btn btn-secondary" id="toggleFaceGuideBtn" onclick="window.toggleFaceGuide()" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+
+              👤 Biometric Guide: <strong id="guideStatusTxt" style="color: var(--primary);">ON</strong>
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="cropper-stage" id="cropperStageBox">
+
+          <img id="cropperSourceImg" src="" alt="Cropper Source">
+
+          <!-- BIOMETRIC OVAL FACE GUIDE OVERLAY -->
+
+          <div class="face-guide-overlay active" id="faceGuideOverlay">
+
+            <div class="face-guide-oval">
+
+              <div class="face-guide-eye-line" title="Align Eye Level Here"></div>
+
+              <div class="face-guide-chin-line" title="Align Chin Here"></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- CROP TOOLBAR -->
+
+        <div class="crop-toolbar">
+
+          <button type="button" class="btn btn-secondary" onclick="window.rotateCropper(-90)" title="Rotate Left 90°">↶ -90°</button>
+
+          <button type="button" class="btn btn-secondary" onclick="window.rotateCropper(90)" title="Rotate Right 90°">↷ +90°</button>
+
+          <button type="button" class="btn btn-secondary" onclick="window.flipCropperX()" title="Flip Horizontal">↔ Flip X</button>
+
+          <button type="button" class="btn btn-secondary" onclick="window.zoomCropper(0.1)" title="Zoom In">🔍 +</button>
+
+          <button type="button" class="btn btn-secondary" onclick="window.zoomCropper(-0.1)" title="Zoom Out">🔍 -</button>
+
+          <button type="button" class="btn btn-secondary" onclick="window.resetCropper()" title="Reset Crop">↺ Reset</button>
+
+        </div>
+
+
+
+        <div class="step-nav-actions">
+
+          <button type="button" class="btn btn-secondary" onclick="window.goToStep('size')">⬅ Back to Size</button>
+
+          <button type="button" class="btn btn-primary" onclick="window.applyCropAndNext()" style="padding: 0.75rem 2rem; font-weight: 800;">
+
+            Next: Background Color ➜
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ===================================================================
+
+           STEP 3: BACKGROUND COLOR & LIGHTING
+
+           =================================================================== -->
+
+      <div class="studio-panel" id="stepPanelBackground">
+
+        <h3 style="font-size: 1.2rem; color: var(--text-main); margin: 0 0 1rem 0;">Step 3: Select Background Style & Lighting</h3>
+
+
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; align-items: start;">
+
+          <!-- LIVE CANVAS PREVIEW -->
+
+          <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 14px; text-align: center; border: 1px solid var(--surface-border);">
+
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">LIVE PHOTO PREVIEW</div>
+
+            <div style="display: flex; justify-content: center;">
+
+              <canvas id="passportLiveCanvas" style="max-width: 100%; max-height: 320px; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);"></canvas>
+
+            </div>
+
+            <div id="liveCanvasDimText" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">35 × 45 mm (300 DPI)</div>
+
+          </div>
+
+
+
+          <!-- BACKGROUND & LIGHTING CONTROLS -->
+
+          <div>
+
+            <!-- COLOR SWATCHES -->
+
+            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid var(--surface-border); margin-bottom: 1rem;">
+
+              <label style="font-weight: 700; display: block; margin-bottom: 0.6rem; font-size: 0.9rem;">Preset Background Colors:</label>
+
+              <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;">
+
+                <button type="button" class="color-swatch-btn active" data-color="#ffffff" style="background: #ffffff;" title="White (Official Standard)"></button>
+
+                <button type="button" class="color-swatch-btn" data-color="#93c5fd" style="background: #93c5fd;" title="Light Sky Blue"></button>
+
+                <button type="button" class="color-swatch-btn" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></button>
+
+                <button type="button" class="color-swatch-btn" data-color="#f1f5f9" style="background: #f1f5f9;" title="Off-White / Light Grey"></button>
+
+                <button type="button" class="color-swatch-btn" data-color="#ef4444" style="background: #ef4444;" title="Red"></button>
+
+                <button type="button" class="color-swatch-btn" data-color="#1e293b" style="background: #1e293b;" title="Dark Blue / Slate"></button>
+
+                <button type="button" class="color-swatch-btn" data-color="transparent" style="background: repeating-conic-gradient(#808080 0% 25%, #ffffff 0% 50%) 50% / 12px 12px;" title="Transparent"></button>
+
+                <input type="color" id="passportCustomBgColor" value="#ffffff" style="width: 44px; height: 44px; padding: 2px; border-radius: 8px; cursor: pointer;" title="Custom Color Picker">
+
+              </div>
+
+
+
+              <!-- SMART AUTO BACKGROUND COLOR REPLACEMENT -->
+
+              <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--surface-border);">
+
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+
+                  <input type="checkbox" id="autoBgReplaceToggle" checked>
+
+                  <span>Auto-replace existing background with selected color</span>
+
+                </label>
+
+                <div id="bgToleranceBox" style="margin-top: 0.5rem; display: block;">
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted);">
+
+                    <span>Replacement Tolerance</span>
+
+                    <strong id="bgToleranceVal" style="color: var(--primary);">28%</strong>
+
+                  </div>
+
+                  <input type="range" id="bgToleranceRange" min="5" max="80" value="28" class="form-control" style="height: 6px;">
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- LIGHTING & CONTRAST -->
+
+            <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid var(--surface-border);">
+
+              <label style="font-weight: 700; display: block; margin-bottom: 0.6rem; font-size: 0.9rem;">Lighting & Enhancement:</label>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+
+                <div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.78rem;">
+
+                    <span>Brightness</span>
+
+                    <strong id="brightVal">0%</strong>
+
+                  </div>
+
+                  <input type="range" id="brightRange" min="-40" max="40" value="0" class="form-control" style="height: 6px;">
+
+                </div>
+
+                <div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.78rem;">
+
+                    <span>Contrast</span>
+
+                    <strong id="contrastVal">0%</strong>
+
+                  </div>
+
+                  <input type="range" id="contrastRange" min="-40" max="40" value="0" class="form-control" style="height: 6px;">
+
+                </div>
+
+                <div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.78rem;">
+
+                    <span>Saturation</span>
+
+                    <strong id="saturateVal">100%</strong>
+
+                  </div>
+
+                  <input type="range" id="saturateRange" min="50" max="180" value="100" class="form-control" style="height: 6px;">
+
+                </div>
+
+                <div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.78rem;">
+
+                    <span>Sharpness</span>
+
+                    <strong id="sharpVal">Normal</strong>
+
+                  </div>
+
+                  <input type="range" id="sharpRange" min="0" max="3" value="1" class="form-control" style="height: 6px;">
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="step-nav-actions">
+
+          <button type="button" class="btn btn-secondary" onclick="window.goToStep('crop')">⬅ Back to Crop</button>
+
+          <button type="button" class="btn btn-primary" onclick="window.goToStep('cloth')" style="padding: 0.75rem 2rem; font-weight: 800;">
+
+            Next: Attire & Clothes ➜
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ===================================================================
+
+           STEP 4: CLOTHES & ATTIRE OVERLAY (MEN, WOMEN, KIDS, HIJAB)
+
+           =================================================================== -->
+
+      <div class="studio-panel" id="stepPanelCloth">
+
+        <h3 style="font-size: 1.2rem; color: var(--text-main); margin: 0 0 0.5rem 0;">Step 4: Change Person's Clothes & Attire</h3>
+
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">Overlay formal suits, blazers, uniforms or hijab. You can adjust position and size to fit your body perfectly.</p>
+
+
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; align-items: start;">
+
+          <!-- LIVE CANVAS PREVIEW WITH ATTIRE -->
+
+          <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 14px; text-align: center; border: 1px solid var(--surface-border);">
+
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">ATTIRE PLACEMENT PREVIEW</div>
+
+            <div style="display: flex; justify-content: center; position: relative;">
+
+              <canvas id="passportClothCanvas" style="max-width: 100%; max-height: 330px; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.5); cursor: move;"></canvas>
+
+            </div>
+
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">💡 Drag directly on the photo or use sliders below to adjust fit.</div>
+
+          </div>
+
+
+
+          <!-- ATTIRE SELECTOR & CONTROLS -->
+
+          <div>
+
+            <!-- CATEGORY PILLS -->
+
+            <div class="attire-category-tabs">
+
+              <button type="button" class="btn btn-secondary active attire-cat-btn" data-cat="all">All Attires</button>
+
+              <button type="button" class="btn btn-secondary attire-cat-btn" data-cat="men">👔 Men Suits</button>
+
+              <button type="button" class="btn btn-secondary attire-cat-btn" data-cat="women">👗 Women Blazers</button>
+
+              <button type="button" class="btn btn-secondary attire-cat-btn" data-cat="kids">🧒 Kids</button>
+
+              <button type="button" class="btn btn-secondary attire-cat-btn" data-cat="hijab">🧕 Hijab</button>
+
+            </div>
+
+
+
+            <!-- ATTIRE GRID -->
+
+            <div class="attire-grid" id="attireItemsGrid">
+
+              <!-- NONE / ORIGINAL -->
+
+              <div class="attire-card active" data-attire="none">
+
+                <div style="height: 90px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">🚫</div>
+
+                <div class="attire-card-title">Original (No Overlay)</div>
+
+              </div>
+
+
+
+              <!-- MEN BLACK SUIT -->
+
+              <div class="attire-card" data-attire="men_black_suit" data-cat="men">
+
+                <div id="thumb_men_black_suit"></div>
+
+                <div class="attire-card-title">Classic Black Suit</div>
+
+              </div>
+
+
+
+              <!-- MEN NAVY SUIT -->
+
+              <div class="attire-card" data-attire="men_navy_suit" data-cat="men">
+
+                <div id="thumb_men_navy_suit"></div>
+
+                <div class="attire-card-title">Navy Blue & Red Tie</div>
+
+              </div>
+
+
+
+              <!-- WOMEN BLACK BLAZER -->
+
+              <div class="attire-card" data-attire="women_black_blazer" data-cat="women">
+
+                <div id="thumb_women_black_blazer"></div>
+
+                <div class="attire-card-title">Black Executive Blazer</div>
+
+              </div>
+
+
+
+              <!-- WOMEN NAVY BLAZER -->
+
+              <div class="attire-card" data-attire="women_navy_blazer" data-cat="women">
+
+                <div id="thumb_women_navy_blazer"></div>
+
+                <div class="attire-card-title">Navy Formal Blazer</div>
+
+              </div>
+
+
+
+              <!-- KIDS SUIT -->
+
+              <div class="attire-card" data-attire="kid_suit" data-cat="kids">
+
+                <div id="thumb_kid_suit"></div>
+
+                <div class="attire-card-title">Junior Suit & Bowtie</div>
+
+              </div>
+
+
+
+              <!-- HIJAB BLACK -->
+
+              <div class="attire-card" data-attire="hijab_black" data-cat="hijab">
+
+                <div id="thumb_hijab_black"></div>
+
+                <div class="attire-card-title">Black Formal Hijab</div>
+
+              </div>
+
+
+
+              <!-- HIJAB NAVY -->
+
+              <div class="attire-card" data-attire="hijab_navy" data-cat="hijab">
+
+                <div id="thumb_hijab_navy"></div>
+
+                <div class="attire-card-title">Navy Blue Hijab</div>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- ATTIRE POSITION & SCALE CONTROLS -->
+
+            <div id="attireAdjustmentBox" style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid var(--surface-border); margin-top: 1rem; display: none;">
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+
+                <label style="font-weight: 700; font-size: 0.85rem; color: var(--primary);">Fine-Tune Attire Fit</label>
+
+                <button type="button" class="btn btn-secondary" onclick="window.resetAttireTransform()" style="padding: 0.2rem 0.6rem; font-size: 0.78rem;">↺ Reset Position</button>
+
+              </div>
+
+
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+
+                <div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+
+                    <span>Scale / Size</span>
+
+                    <strong id="attireScaleVal">100%</strong>
+
+                  </div>
+
+                  <input type="range" id="attireScaleRange" min="60" max="180" value="100" class="form-control" style="height: 6px;">
+
+                </div>
+
+                <div>
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+
+                    <span>Vertical Position (Y)</span>
+
+                    <strong id="attirePosYVal">0px</strong>
+
+                  </div>
+
+                  <input type="range" id="attirePosYRange" min="-120" max="120" value="0" class="form-control" style="height: 6px;">
+
+                </div>
+
+                <div style="grid-column: span 2;">
+
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+
+                    <span>Horizontal Position (X)</span>
+
+                    <strong id="attirePosXVal">0px</strong>
+
+                  </div>
+
+                  <input type="range" id="attirePosXRange" min="-100" max="100" value="0" class="form-control" style="height: 6px;">
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+
+          </div>
+
+        </div>
+
+
+
+        <div class="step-nav-actions">
+
+          <button type="button" class="btn btn-secondary" onclick="window.goToStep('background')">⬅ Back to Background</button>
+
+          <button type="button" class="btn btn-primary" onclick="window.goToStep('download')" style="padding: 0.75rem 2rem; font-weight: 800;">
+
+            Next: Download & Print Studio ➜
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ===================================================================
+
+           STEP 5: DOWNLOAD & PRINT STUDIO (A4, 4x6, 50KB/20KB COMPRESSOR)
+
+           =================================================================== -->
+
+      <div class="studio-panel" id="stepPanelDownload">
+
+        <h3 style="font-size: 1.25rem; color: var(--text-main); margin: 0 0 1.25rem 0;">Step 5: Download & Print Studio</h3>
+
+
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+
+          
+
+          <!-- SECTION A: SINGLE PHOTO DOWNLOAD -->
+
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column;">
+
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+
+              <span style="font-size: 1.5rem;">👤</span>
+
+              <div>
+
+                <h4 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">Single Passport Photo</h4>
+
+                <small style="color: var(--text-muted);">Ready for online visa / job / exam portals</small>
+
+              </div>
+
+            </div>
+
+
+
+            <div style="text-align: center; background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 12px; margin-bottom: 1.25rem; border: 1px solid var(--surface-border);">
+
+              <canvas id="passportSingleFinalCanvas" style="max-height: 200px; max-width: 100%; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);"></canvas>
+
+              <div id="singleFinalMetricsTxt" style="font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-top: 0.5rem;">35 × 45 mm</div>
+
+            </div>
+
+
+
+            <!-- TARGET KB SIZE OPTION -->
+
+            <label style="font-weight: 700; font-size: 0.88rem; display: block;">Target File Size (Compress for Portals):</label>
+
+            <div class="target-size-pills">
+
+              <span class="target-size-pill active" data-targetkb="0">Max Quality</span>
+
+              <span class="target-size-pill" data-targetkb="20">Under 20 KB (UPSC/SSC)</span>
+
+              <span class="target-size-pill" data-targetkb="50">Under 50 KB (Passport/Visa)</span>
+
+              <span class="target-size-pill" data-targetkb="100">Under 100 KB</span>
+
+            </div>
+
+
+
+            <div style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+
+              <div class="form-group" style="flex: 1; margin: 0;">
+
+                <label style="font-size: 0.8rem; font-weight: 600;">Format</label>
+
+                <select id="singlePhotoFormat" class="form-control">
+
+                  <option value="image/jpeg" selected>JPG (Recommended)</option>
+
+                  <option value="image/png">PNG</option>
+
+                </select>
+
+              </div>
+
+              <div class="form-group" style="flex: 1; margin: 0;">
+
+                <label style="font-size: 0.8rem; font-weight: 600;">Est. File Size</label>
+
+                <div id="singleEstSizeBadge" style="padding: 0.6rem; border-radius: 8px; background: rgba(0,242,254,0.1); color: var(--primary); font-weight: 800; font-size: 0.9rem; text-align: center;">Calculating...</div>
+
+              </div>
+
+            </div>
+
+
+
+            <button type="button" id="downloadSinglePhotoFinalBtn" class="btn btn-primary" onclick="window.downloadSinglePhoto()" style="margin-top: 1.25rem; padding: 0.9rem; font-weight: 800;">
+
+              ⬇ DOWNLOAD SINGLE PHOTO
+
+            </button>
+
+          </div>
+
+
+
+          <!-- SECTION B: MULTI-PHOTO PRINTABLE SHEET -->
+
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column;">
+
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+
+              <span style="font-size: 1.5rem;">📄</span>
+
+              <div>
+
+                <h4 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">Printable Multi-Photo Sheet</h4>
+
+                <small style="color: var(--text-muted);">Arrange multiple copies on A4 or 4×6 photo paper</small>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- SHEET CONTROLS -->
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+
+              <div class="form-group" style="margin: 0;">
+
+                <label style="font-size: 0.8rem; font-weight: 600;">Paper Sheet</label>
+
+                <select id="sheetPaperSelect" class="form-control" onchange="window.renderSheetCanvas()">
+
+                  <option value="a4" selected>A4 Sheet (210 × 297 mm)</option>
+
+                  <option value="4x6">4 × 6 Inch (10 × 15 cm)</option>
+
+                  <option value="5x7">5 × 7 Inch</option>
+
+                </select>
+
+              </div>
+
+              <div class="form-group" style="margin: 0;">
+
+                <label style="font-size: 0.8rem; font-weight: 600;">Number of Copies</label>
+
+                <input type="number" id="sheetCopiesInput" value="30" min="1" max="60" class="form-control" oninput="window.renderSheetCanvas()">
+
+              </div>
+
+              <div class="form-group" style="margin: 0;">
+
+                <label style="font-size: 0.8rem; font-weight: 600;">Orientation</label>
+
+                <select id="sheetOrientationSelect" class="form-control" onchange="window.renderSheetCanvas()">
+
+                  <option value="portrait" selected>Portrait</option>
+
+                  <option value="landscape">Landscape</option>
+
+                </select>
+
+              </div>
+
+              <div class="form-group" style="margin: 0; display: flex; flex-direction: column; justify-content: center;">
+
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; margin-top: 1rem;">
+
+                  <input type="checkbox" id="sheetCutLinesToggle" checked onchange="window.renderSheetCanvas()">
+
+                  <span>Cutting Guide Lines</span>
+
+                </label>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- SHEET PREVIEW -->
+
+            <div style="background: #ffffff; border-radius: 8px; padding: 0.5rem; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.4); max-height: 220px; overflow: auto; margin-bottom: 1.25rem;">
+
+              <canvas id="passportSheetCanvas" style="max-width: 100%; height: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></canvas>
+
+            </div>
+
+
+
+            <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: auto;">
+
+              <button type="button" class="btn btn-primary" onclick="window.downloadSheetImage()" style="flex: 1; padding: 0.8rem; font-size: 0.9rem; font-weight: 800;">
+
+                🖼️ Image Sheet
+
+              </button>
+
+              <button type="button" class="btn btn-primary" onclick="window.downloadSheetPdf()" style="flex: 1; padding: 0.8rem; font-size: 0.9rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border: none;">
+
+                📑 PDF Sheet
+
+              </button>
+
+              <button type="button" class="btn btn-secondary" onclick="window.printSheetDirectly()" style="padding: 0.8rem 1.25rem; font-size: 0.9rem; font-weight: 800;">
+
+                🖨️ Print
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+
+        </div>
+
+
+
+        <div class="step-nav-actions">
+
+          <button type="button" class="btn btn-secondary" onclick="window.goToStep('cloth')">⬅ Back to Attire</button>
+
+          <button type="button" class="btn btn-secondary" onclick="window.resetPassportTool()">🔄 Start New Photo</button>
+
+        </div>
+
+      </div>
+
+
+
+    </div>
+
+
 
   </div>
+
 </div>
 
+
+
+<!-- EMBEDDED ATTIRE SVGS & SCRIPT LOGIC -->
+
 <script>
-(function() {
-  function initIdPhotoController() {
-    const dropzone = document.getElementById('idDropzone');
-    const readingCard = document.getElementById('idReading');
-    const readyCard = document.getElementById('idReady');
-    const editorStudio = document.getElementById('idEditorStudio');
 
-    const fileInput = document.getElementById('idFileInput');
-    const idChangePhotoBtn = document.getElementById('idChangePhotoBtn');
-    const idProceedBtn = document.getElementById('idProceedBtn');
-    const idResetAllBtn = document.getElementById('idResetAllBtn');
+window.PASSPORT_ATTIRES = {"men_black_suit": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 500 400\" width=\"500\" height=\"400\">\n  <defs>\n    <linearGradient id=\"suitBlack\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#2a2e37\"/>\n      <stop offset=\"50%\" stop-color=\"#181a20\"/>\n      <stop offset=\"100%\" stop-color=\"#0f1115\"/>\n    </linearGradient>\n    <linearGradient id=\"lapelBlack\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#373c47\"/>\n      <stop offset=\"100%\" stop-color=\"#1d2027\"/>\n    </linearGradient>\n    <linearGradient id=\"tieBlue\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#2563eb\"/>\n      <stop offset=\"50%\" stop-color=\"#1e40af\"/>\n      <stop offset=\"100%\" stop-color=\"#172554\"/>\n    </linearGradient>\n    <filter id=\"suitShadow\" x=\"-10%\" y=\"-10%\" width=\"120%\" height=\"120%\">\n      <feDropShadow dx=\"0\" dy=\"4\" stdDeviation=\"6\" flood-color=\"#000000\" flood-opacity=\"0.4\"/>\n    </filter>\n  </defs>\n  <!-- Shoulders & Coat Base -->\n  <path d=\"M20 400 C40 280, 70 170, 140 120 C180 90, 220 85, 250 85 C280 85, 320 90, 360 120 C430 170, 460 280, 480 400 Z\" fill=\"url(#suitBlack)\" filter=\"url(#suitShadow)\"/>\n  <!-- White Inner Shirt V -->\n  <polygon points=\"190,85 250,190 310,85 285,60 215,60\" fill=\"#ffffff\" stroke=\"#cbd5e1\" stroke-width=\"1.5\"/>\n  <!-- Shirt Collar Wings -->\n  <polygon points=\"190,85 220,135 235,85\" fill=\"#f8fafc\" stroke=\"#94a3b8\" stroke-width=\"1\"/>\n  <polygon points=\"310,85 280,135 265,85\" fill=\"#f8fafc\" stroke=\"#94a3b8\" stroke-width=\"1\"/>\n  <!-- Tie Knot -->\n  <polygon points=\"238,98 262,98 257,128 243,128\" fill=\"url(#tieBlue)\" stroke=\"#1e3a8a\" stroke-width=\"0.5\"/>\n  <!-- Tie Body with bevel -->\n  <polygon points=\"243,128 257,128 266,350 250,385 234,350\" fill=\"url(#tieBlue)\"/>\n  <polygon points=\"250,128 257,128 266,350 250,385\" fill=\"rgba(0,0,0,0.18)\"/>\n  <!-- Left Notch Lapel -->\n  <path d=\"M150 115 L220 270 L195 275 L110 175 Z\" fill=\"url(#lapelBlack)\" stroke=\"#090a0d\" stroke-width=\"1.5\"/>\n  <!-- Right Notch Lapel -->\n  <path d=\"M350 115 L280 270 L305 275 L390 175 Z\" fill=\"url(#lapelBlack)\" stroke=\"#090a0d\" stroke-width=\"1.5\"/>\n  <!-- Center Coat Seam & Button -->\n  <line x1=\"250\" y1=\"275\" x2=\"250\" y2=\"400\" stroke=\"#090a0d\" stroke-width=\"2.5\"/>\n  <circle cx=\"250\" cy=\"315\" r=\"7\" fill=\"#090a0d\" stroke=\"#475569\" stroke-width=\"1.5\"/>\n</svg>", "men_navy_suit": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 500 400\" width=\"500\" height=\"400\">\n  <defs>\n    <linearGradient id=\"suitNavy\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#1e3a8a\"/>\n      <stop offset=\"50%\" stop-color=\"#0f172a\"/>\n      <stop offset=\"100%\" stop-color=\"#020617\"/>\n    </linearGradient>\n    <linearGradient id=\"lapelNavy\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#2563eb\"/>\n      <stop offset=\"50%\" stop-color=\"#1e3a8a\"/>\n      <stop offset=\"100%\" stop-color=\"#0f172a\"/>\n    </linearGradient>\n    <linearGradient id=\"tieRed\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#dc2626\"/>\n      <stop offset=\"50%\" stop-color=\"#991b1b\"/>\n      <stop offset=\"100%\" stop-color=\"#7f1d1d\"/>\n    </linearGradient>\n  </defs>\n  <!-- Shoulders & Coat Base -->\n  <path d=\"M20 400 C40 280, 70 170, 140 120 C180 90, 220 85, 250 85 C280 85, 320 90, 360 120 C430 170, 460 280, 480 400 Z\" fill=\"url(#suitNavy)\"/>\n  <!-- Light Blue Shirt -->\n  <polygon points=\"190,85 250,190 310,85 285,60 215,60\" fill=\"#e0f2fe\" stroke=\"#bae6fd\" stroke-width=\"1.5\"/>\n  <polygon points=\"190,85 220,135 235,85\" fill=\"#f0f9ff\" stroke=\"#7dd3fc\" stroke-width=\"1\"/>\n  <polygon points=\"310,85 280,135 265,85\" fill=\"#f0f9ff\" stroke=\"#7dd3fc\" stroke-width=\"1\"/>\n  <!-- Red Tie Knot -->\n  <polygon points=\"238,98 262,98 257,128 243,128\" fill=\"url(#tieRed)\"/>\n  <!-- Red Tie Body -->\n  <polygon points=\"243,128 257,128 266,350 250,385 234,350\" fill=\"url(#tieRed)\"/>\n  <polygon points=\"250,128 257,128 266,350 250,385\" fill=\"rgba(0,0,0,0.2)\"/>\n  <!-- Left Notch Lapel -->\n  <path d=\"M150 115 L220 270 L195 275 L110 175 Z\" fill=\"url(#lapelNavy)\" stroke=\"#090a0d\" stroke-width=\"1.5\"/>\n  <!-- Right Notch Lapel -->\n  <path d=\"M350 115 L280 270 L305 275 L390 175 Z\" fill=\"url(#lapelNavy)\" stroke=\"#090a0d\" stroke-width=\"1.5\"/>\n  <!-- Center Coat Seam & Button -->\n  <line x1=\"250\" y1=\"275\" x2=\"250\" y2=\"400\" stroke=\"#020617\" stroke-width=\"2.5\"/>\n  <circle cx=\"250\" cy=\"315\" r=\"7\" fill=\"#020617\" stroke=\"#38bdf8\" stroke-width=\"1.5\"/>\n</svg>", "women_black_blazer": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 500 400\" width=\"500\" height=\"400\">\n  <defs>\n    <linearGradient id=\"wmBlack\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#262626\"/>\n      <stop offset=\"50%\" stop-color=\"#171717\"/>\n      <stop offset=\"100%\" stop-color=\"#0a0a0a\"/>\n    </linearGradient>\n    <linearGradient id=\"wmCollar\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#404040\"/>\n      <stop offset=\"100%\" stop-color=\"#1f1f1f\"/>\n    </linearGradient>\n  </defs>\n  <!-- Shoulders / Feminine Silhouette -->\n  <path d=\"M30 400 C50 270, 85 160, 150 115 C185 90, 220 85, 250 85 C280 85, 315 90, 350 115 C415 160, 450 270, 470 400 Z\" fill=\"url(#wmBlack)\"/>\n  <!-- White V-neck Blouse / Camisole -->\n  <path d=\"M200 85 Q250 180 300 85 Z\" fill=\"#ffffff\" stroke=\"#e2e8f0\" stroke-width=\"1.5\"/>\n  <path d=\"M220 100 Q250 160 280 100 Z\" fill=\"#f8fafc\"/>\n  <!-- Left Shawl / Peaked Lapel -->\n  <path d=\"M150 110 C180 160, 210 230, 248 260 L230 268 C190 230, 150 170, 120 135 Z\" fill=\"url(#wmCollar)\" stroke=\"#0a0a0a\" stroke-width=\"1\"/>\n  <!-- Right Shawl / Peaked Lapel -->\n  <path d=\"M350 110 C320 160, 290 230, 252 260 L270 268 C310 230, 350 170, 380 135 Z\" fill=\"url(#wmCollar)\" stroke=\"#0a0a0a\" stroke-width=\"1\"/>\n  <!-- Center Seam & Button -->\n  <line x1=\"250\" y1=\"262\" x2=\"250\" y2=\"400\" stroke=\"#0a0a0a\" stroke-width=\"2\"/>\n  <circle cx=\"250\" cy=\"295\" r=\"6\" fill=\"#000000\" stroke=\"#525252\" stroke-width=\"1.5\"/>\n</svg>", "women_navy_blazer": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 500 400\" width=\"500\" height=\"400\">\n  <defs>\n    <linearGradient id=\"wmNavy\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#1e3a8a\"/>\n      <stop offset=\"50%\" stop-color=\"#0f172a\"/>\n      <stop offset=\"100%\" stop-color=\"#020617\"/>\n    </linearGradient>\n    <linearGradient id=\"wmNavyLapel\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#2563eb\"/>\n      <stop offset=\"100%\" stop-color=\"#1e3a8a\"/>\n    </linearGradient>\n  </defs>\n  <path d=\"M30 400 C50 270, 85 160, 150 115 C185 90, 220 85, 250 85 C280 85, 315 90, 350 115 C415 160, 450 270, 470 400 Z\" fill=\"url(#wmNavy)\"/>\n  <!-- Silk Cream Blouse -->\n  <path d=\"M195 85 Q250 190 305 85 Z\" fill=\"#fdf4ff\" stroke=\"#f5d0fe\" stroke-width=\"1.5\"/>\n  <path d=\"M215 95 Q250 170 285 95 Z\" fill=\"#ffffff\"/>\n  <!-- Left Lapel -->\n  <path d=\"M150 110 C180 160, 210 230, 248 260 L230 268 C190 230, 150 170, 120 135 Z\" fill=\"url(#wmNavyLapel)\" stroke=\"#020617\" stroke-width=\"1\"/>\n  <!-- Right Lapel -->\n  <path d=\"M350 110 C320 160, 290 230, 252 260 L270 268 C310 230, 350 170, 380 135 Z\" fill=\"url(#wmNavyLapel)\" stroke=\"#020617\" stroke-width=\"1\"/>\n  <line x1=\"250\" y1=\"262\" x2=\"250\" y2=\"400\" stroke=\"#020617\" stroke-width=\"2\"/>\n  <circle cx=\"250\" cy=\"295\" r=\"6\" fill=\"#020617\" stroke=\"#38bdf8\" stroke-width=\"1.5\"/>\n</svg>", "kid_suit": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 500 400\" width=\"500\" height=\"400\">\n  <defs>\n    <linearGradient id=\"kidCoat\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#1e293b\"/>\n      <stop offset=\"100%\" stop-color=\"#0f172a\"/>\n    </linearGradient>\n    <linearGradient id=\"bowtieRed\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#ef4444\"/>\n      <stop offset=\"100%\" stop-color=\"#b91c1c\"/>\n    </linearGradient>\n  </defs>\n  <path d=\"M40 400 C60 270, 90 160, 160 120 C190 95, 220 90, 250 90 C280 90, 310 95, 340 120 C410 160, 440 270, 460 400 Z\" fill=\"url(#kidCoat)\"/>\n  <!-- White Collar -->\n  <polygon points=\"190,90 250,170 310,90 280,65 220,65\" fill=\"#ffffff\" stroke=\"#cbd5e1\" stroke-width=\"1.5\"/>\n  <!-- Red Bowtie -->\n  <polygon points=\"215,95 240,115 215,135\" fill=\"url(#bowtieRed)\"/>\n  <polygon points=\"285,95 260,115 285,135\" fill=\"url(#bowtieRed)\"/>\n  <ellipse cx=\"250\" cy=\"115\" rx=\"8\" ry=\"10\" fill=\"#991b1b\" stroke=\"#7f1d1d\" stroke-width=\"1\"/>\n  <!-- Lapels -->\n  <path d=\"M160 120 L225 240 L205 245 L135 160 Z\" fill=\"#334155\" stroke=\"#0f172a\" stroke-width=\"1\"/>\n  <path d=\"M340 120 L275 240 L295 245 L365 160 Z\" fill=\"#334155\" stroke=\"#0f172a\" stroke-width=\"1\"/>\n  <line x1=\"250\" y1=\"245\" x2=\"250\" y2=\"400\" stroke=\"#0f172a\" stroke-width=\"2\"/>\n</svg>", "hijab_black": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 500 400\" width=\"500\" height=\"400\">\n  <defs>\n    <linearGradient id=\"hijabDark\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#262626\"/>\n      <stop offset=\"50%\" stop-color=\"#171717\"/>\n      <stop offset=\"100%\" stop-color=\"#0a0a0a\"/>\n    </linearGradient>\n    <linearGradient id=\"hijabFold\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#383838\"/>\n      <stop offset=\"100%\" stop-color=\"#1a1a1a\"/>\n    </linearGradient>\n  </defs>\n  <!-- Draped Hijab Shoulders & Chest -->\n  <path d=\"M20 400 C40 270, 70 170, 130 110 C160 80, 200 70, 250 70 C300 70, 340 80, 370 110 C430 170, 460 270, 480 400 Z\" fill=\"url(#hijabDark)\"/>\n  <!-- Face Opening Oval Cutout -->\n  <path d=\"M175 60 C175 140, 185 195, 250 200 C315 195, 325 140, 325 60 Z\" fill=\"none\" stroke=\"url(#hijabFold)\" stroke-width=\"8\"/>\n  <!-- Draping folds -->\n  <path d=\"M140 170 Q250 240 360 170\" fill=\"none\" stroke=\"rgba(255,255,255,0.08)\" stroke-width=\"4\"/>\n  <path d=\"M160 220 Q250 280 340 220\" fill=\"none\" stroke=\"rgba(255,255,255,0.06)\" stroke-width=\"4\"/>\n  <path d=\"M190 270 Q250 320 310 270\" fill=\"none\" stroke=\"rgba(255,255,255,0.05)\" stroke-width=\"3\"/>\n</svg>", "hijab_navy": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 500 400\" width=\"500\" height=\"400\">\n  <defs>\n    <linearGradient id=\"hijabNavy\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#1e3a8a\"/>\n      <stop offset=\"50%\" stop-color=\"#0f172a\"/>\n      <stop offset=\"100%\" stop-color=\"#020617\"/>\n    </linearGradient>\n    <linearGradient id=\"hijabNavyFold\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"100%\">\n      <stop offset=\"0%\" stop-color=\"#3b82f6\"/>\n      <stop offset=\"100%\" stop-color=\"#1d4ed8\"/>\n    </linearGradient>\n  </defs>\n  <path d=\"M20 400 C40 270, 70 170, 130 110 C160 80, 200 70, 250 70 C300 70, 340 80, 370 110 C430 170, 460 270, 480 400 Z\" fill=\"url(#hijabNavy)\"/>\n  <path d=\"M175 60 C175 140, 185 195, 250 200 C315 195, 325 140, 325 60 Z\" fill=\"none\" stroke=\"url(#hijabNavyFold)\" stroke-width=\"8\"/>\n  <path d=\"M140 170 Q250 240 360 170\" fill=\"none\" stroke=\"rgba(255,255,255,0.12)\" stroke-width=\"4\"/>\n  <path d=\"M160 220 Q250 280 340 220\" fill=\"none\" stroke=\"rgba(255,255,255,0.08)\" stroke-width=\"4\"/>\n  <path d=\"M190 270 Q250 320 310 270\" fill=\"none\" stroke=\"rgba(255,255,255,0.06)\" stroke-width=\"3\"/>\n</svg>"};
 
-    const idReadingFileName = document.getElementById('idReadingFileName');
-    const idReadingFileSize = document.getElementById('idReadingFileSize');
-    const idReadingProgressFill = document.getElementById('idReadingProgressFill');
-    const idReadingPercentText = document.getElementById('idReadingPercentText');
-
-    const idReadyPreview = document.getElementById('idReadyPreview');
-    const idReadyFileName = document.getElementById('idReadyFileName');
-    const idReadyFileSize = document.getElementById('idReadyFileSize');
-    const idReadyDimensions = document.getElementById('idReadyDimensions');
-
-    const singleCanvas = document.getElementById('singlePhotoCanvas');
-    const sCtx = singleCanvas.getContext('2d');
-    const a4Canvas = document.getElementById('a4Canvas');
-    const aCtx = a4Canvas.getContext('2d');
-
-    const idWidthInput = document.getElementById('idWidthInput');
-    const idHeightInput = document.getElementById('idHeightInput');
-    const idUnitSelect = document.getElementById('idUnitSelect');
-    const idDpiSelect = document.getElementById('idDpiSelect');
-
-    const idBgColorPicker = document.getElementById('idBgColorPicker');
-    const idZoomRange = document.getElementById('idZoomRange');
-    const idZoomText = document.getElementById('idZoomText');
-    const idRotRange = document.getElementById('idRotRange');
-    const idRotText = document.getElementById('idRotText');
-    const idPosXRange = document.getElementById('idPosXRange');
-    const idPosXText = document.getElementById('idPosXText');
-    const idPosYRange = document.getElementById('idPosYRange');
-    const idPosYText = document.getElementById('idPosYText');
-    const idBrightRange = document.getElementById('idBrightRange');
-    const idBrightText = document.getElementById('idBrightText');
-    const idContrastRange = document.getElementById('idContrastRange');
-    const idContrastText = document.getElementById('idContrastText');
-
-    const a4OrientationSelect = document.getElementById('a4OrientationSelect');
-    const a4MarginInput = document.getElementById('a4MarginInput');
-    const a4GapInput = document.getElementById('a4GapInput');
-    const a4CopiesInput = document.getElementById('a4CopiesInput');
-    const maxCopiesCalcText = document.getElementById('maxCopiesCalcText');
-
-    const singlePhotoMetricsText = document.getElementById('singlePhotoMetricsText');
-
-    let activeFile = null;
-    let objectUrl = null;
-    let sourceImage = null;
-    let progressTimer = null;
-
-    function formatBytes(bytes) {
-      if (!bytes || bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    function showState(card) {
-      dropzone.style.display = 'none';
-      readingCard.style.display = 'none';
-      readyCard.style.display = 'none';
-      editorStudio.style.display = 'none';
-      if (card) card.style.display = 'block';
-    }
-
-    function resetAll() {
-      fileInput.value = '';
-      activeFile = null;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      objectUrl = null;
-      sourceImage = null;
-      if (progressTimer) clearInterval(progressTimer);
-      showState(dropzone);
-    }
-
-    function handleIdFile(file) {
-      if (!file || !file.type.startsWith('image/')) {
-        if (window.showToast) window.showToast("Please select a valid image file", "error");
-        return;
-      }
-
-      activeFile = file;
-      idReadingFileName.textContent = file.name;
-      idReadingFileSize.textContent = formatBytes(file.size);
-      showState(readingCard);
-
-      let progress = 0;
-      idReadingProgressFill.style.width = '0%';
-      idReadingPercentText.textContent = '0%';
-      if (progressTimer) clearInterval(progressTimer);
-
-      progressTimer = setInterval(() => {
-        progress += Math.floor(Math.random() * 25) + 20;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(progressTimer);
-          finishReading(file);
-        }
-        idReadingProgressFill.style.width = progress + '%';
-        idReadingPercentText.textContent = progress + '%';
-      }, 30);
-    }
-    window.handleIdFile = handleIdFile;
-
-    function finishReading(file) {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      objectUrl = URL.createObjectURL(file);
-      idReadyPreview.src = objectUrl;
-
-      idReadyFileName.textContent = file.name;
-      idReadyFileSize.textContent = formatBytes(file.size);
-
-      const img = new Image();
-      img.onload = function() {
-        sourceImage = img;
-        const w = img.naturalWidth || img.width;
-        const h = img.naturalHeight || img.height;
-        idReadyDimensions.textContent = w + " × " + h + " px";
-        showState(readyCard);
-      };
-      img.src = objectUrl;
-    }
-
-    function getPhotoPxDimensions() {
-      const unit = idUnitSelect.value;
-      const dpi = parseInt(idDpiSelect.value) || 300;
-      const valW = parseFloat(idWidthInput.value) || 35;
-      const valH = parseFloat(idHeightInput.value) || 45;
-
-      let wPx = valW, hPx = valH;
-      if (unit === 'mm') {
-        wPx = Math.round((valW * dpi) / 25.4);
-        hPx = Math.round((valH * dpi) / 25.4);
-      } else if (unit === 'inch') {
-        wPx = Math.round(valW * dpi);
-        hPx = Math.round(valH * dpi);
-      }
-      return { wPx, hPx, valW, valH, unit, dpi };
-    }
-
-    // Render Single Photo Canvas
-    function renderSinglePhoto() {
-      if (!sourceImage) return;
-
-      const dim = getPhotoPxDimensions();
-      singleCanvas.width = dim.wPx;
-      singleCanvas.height = dim.hPx;
-
-      // Fill Background Color
-      sCtx.fillStyle = idBgColorPicker.value;
-      sCtx.fillRect(0, 0, dim.wPx, dim.hPx);
-
-      // Apply Filter & Transforms
-      sCtx.save();
-      const zoom = parseFloat(idZoomRange.value) / 100;
-      const rot = parseInt(idRotRange.value) * (Math.PI / 180);
-      const posX = parseInt(idPosXRange.value);
-      const posY = parseInt(idPosYRange.value);
-      const bright = parseInt(idBrightRange.value);
-      const contrast = parseInt(idContrastRange.value);
-
-      sCtx.filter = `brightness(${100 + bright}%) contrast(${100 + contrast}%)`;
-
-      sCtx.translate(dim.wPx / 2 + posX, dim.hPx / 2 + posY);
-      sCtx.rotate(rot);
-      sCtx.scale(zoom, zoom);
-
-      // Draw centered image
-      const srcW = sourceImage.naturalWidth || sourceImage.width;
-      const srcH = sourceImage.naturalHeight || sourceImage.height;
-      const coverScale = Math.max(dim.wPx / srcW, dim.hPx / srcH);
-      const drawW = srcW * coverScale;
-      const drawH = srcH * coverScale;
-
-      sCtx.drawImage(sourceImage, -drawW / 2, -drawH / 2, drawW, drawH);
-      sCtx.restore();
-
-      singlePhotoMetricsText.textContent = `${dim.valW} × ${dim.valH} ${dim.unit} (${dim.wPx} × ${dim.hPx} px @ ${dim.dpi} DPI)`;
-
-      renderA4Sheet();
-    }
-
-    // Render A4 Printable Sheet Canvas with Dynamic Arrangement & Cut Lines
-    function renderA4Sheet() {
-      if (!sourceImage) return;
-
-      const dpi = parseInt(idDpiSelect.value) || 300;
-      const isLandscape = a4OrientationSelect.value === 'landscape';
-
-      // A4 dimensions in mm: 210 x 297
-      const a4Wmm = isLandscape ? 297 : 210;
-      const a4Hmm = isLandscape ? 210 : 297;
-
-      const a4Wpx = Math.round((a4Wmm * dpi) / 25.4);
-      const a4Hpx = Math.round((a4Hmm * dpi) / 25.4);
-
-      a4Canvas.width = a4Wpx;
-      a4Canvas.height = a4Hpx;
-
-      // Draw A4 White Background
-      aCtx.fillStyle = "#FFFFFF";
-      aCtx.fillRect(0, 0, a4Wpx, a4Hpx);
-
-      const marginMm = parseFloat(a4MarginInput.value) || 10;
-      const gapMm = parseFloat(a4GapInput.value) || 4;
-
-      const marginPx = Math.round((marginMm * dpi) / 25.4);
-      const gapPx = Math.round((gapMm * dpi) / 25.4);
-
-      const dim = getPhotoPxDimensions();
-      const photoWpx = dim.wPx;
-      const photoHpx = dim.hPx;
-
-      // Calculate max photos that fit per page
-      const cols = Math.floor((a4Wpx - 2 * marginPx + gapPx) / (photoWpx + gapPx));
-      const rows = Math.floor((a4Hpx - 2 * marginPx + gapPx) / (photoHpx + gapPx));
-      const maxPossible = Math.max(1, cols * rows);
-
-      maxCopiesCalcText.textContent = `Max ${maxPossible} per A4 page`;
-
-      let requestedCopies = parseInt(a4CopiesInput.value) || maxPossible;
-      if (requestedCopies > maxPossible) requestedCopies = maxPossible;
-
-      // Render Photos on Grid
-      let count = 0;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (count >= requestedCopies) break;
-
-          const x = marginPx + c * (photoWpx + gapPx);
-          const y = marginPx + r * (photoHpx + gapPx);
-
-          // Draw single photo instance from singleCanvas
-          aCtx.drawImage(singleCanvas, x, y, photoWpx, photoHpx);
-
-          // Draw fine crop outline around each photo
-          aCtx.strokeStyle = "rgba(0,0,0,0.25)";
-          aCtx.lineWidth = Math.max(1, Math.round(dpi / 300));
-          aCtx.strokeRect(x, y, photoWpx, photoHpx);
-
-          count++;
-        }
-        if (count >= requestedCopies) break;
-      }
-    }
-
-    idProceedBtn.addEventListener('click', function() {
-      showState(editorStudio);
-      renderSinglePhoto();
-    });
-
-    // Preset Clicks
-    document.querySelectorAll('.photo-preset-card').forEach(card => {
-      card.addEventListener('click', function() {
-        document.querySelectorAll('.photo-preset-card').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-
-        const preset = this.getAttribute('data-idpreset');
-        if (preset === 'passport-3545') {
-          idUnitSelect.value = 'mm';
-          idWidthInput.value = 35;
-          idHeightInput.value = 45;
-        } else if (preset === 'visa-22') {
-          idUnitSelect.value = 'inch';
-          idWidthInput.value = 2;
-          idHeightInput.value = 2;
-        } else if (preset === 'id-card') {
-          idUnitSelect.value = 'mm';
-          idWidthInput.value = 25;
-          idHeightInput.value = 35;
-        }
-        renderSinglePhoto();
-      });
-    });
-
-    // Preset Color Buttons
-    document.querySelectorAll('.bg-color-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        idBgColorPicker.value = this.getAttribute('data-color');
-        renderSinglePhoto();
-      });
-    });
-
-    idWidthInput.addEventListener('input', renderSinglePhoto);
-    idHeightInput.addEventListener('input', renderSinglePhoto);
-    idUnitSelect.addEventListener('change', renderSinglePhoto);
-    idDpiSelect.addEventListener('change', renderSinglePhoto);
-
-    idBgColorPicker.addEventListener('input', renderSinglePhoto);
-
-    idZoomRange.addEventListener('input', function() { idZoomText.textContent = this.value + '%'; renderSinglePhoto(); });
-    idRotRange.addEventListener('input', function() { idRotText.textContent = this.value + '°'; renderSinglePhoto(); });
-    idPosXRange.addEventListener('input', function() { idPosXText.textContent = this.value + 'px'; renderSinglePhoto(); });
-    idPosYRange.addEventListener('input', function() { idPosYText.textContent = this.value + 'px'; renderSinglePhoto(); });
-    idBrightRange.addEventListener('input', function() { idBrightText.textContent = this.value; renderSinglePhoto(); });
-    idContrastRange.addEventListener('input', function() { idContrastText.textContent = this.value; renderSinglePhoto(); });
-
-    a4OrientationSelect.addEventListener('change', renderA4Sheet);
-    a4MarginInput.addEventListener('input', renderA4Sheet);
-    a4GapInput.addEventListener('input', renderA4Sheet);
-    a4CopiesInput.addEventListener('input', renderA4Sheet);
-
-    // Download & Print Action Listeners
-    document.getElementById('downloadSinglePhotoBtn').addEventListener('click', function() {
-      const link = document.createElement('a');
-      link.download = 'passport-photo.png';
-      link.href = singleCanvas.toDataURL('image/png', 1.0);
-      link.click();
-      if (window.showToast) window.showToast("Downloaded single photo!", "success");
-    });
-
-    document.getElementById('downloadA4ImageBtn').addEventListener('click', function() {
-      const link = document.createElement('a');
-      link.download = 'passport-photos-a4.png';
-      link.href = a4Canvas.toDataURL('image/png', 1.0);
-      link.click();
-      if (window.showToast) window.showToast("Downloaded printable A4 sheet image!", "success");
-    });
-
-    document.getElementById('printA4Btn').addEventListener('click', function() {
-      const win = window.open('', '_blank');
-      win.document.write(`
-        <html>
-          <head>
-            <title>Print Passport Photos A4 Sheet</title>
-            <style>
-              body { margin: 0; padding: 0; text-align: center; }
-              img { max-width: 100%; height: auto; }
-              @page { size: A4 ${a4OrientationSelect.value}; margin: 0; }
-            </style>
-          </head>
-          <body onload="window.print(); window.close();">
-            <img src="${a4Canvas.toDataURL('image/png', 1.0)}" />
-          </body>
-        </html>
-      `);
-      win.document.close();
-    });
-
-    idChangePhotoBtn.addEventListener('click', resetAll);
-    idResetAllBtn.addEventListener('click', resetAll);
-
-    resetAll();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initIdPhotoController);
-  } else {
-    initIdPhotoController();
-  }
-})();
 </script>
 
+
+
+<script>
+
+(function() {
+
+  let cropperInstance = null;
+
+  let rawUploadedImage = null;
+
+  let croppedBaseCanvas = null; // Canvas containing cropped face
+
+  let bgProcessedCanvas = null; // Canvas after background + lighting
+
+  let attireImageObj = null;
+
+  let activeAttireKey = 'none';
+
+
+
+  // State parameters
+
+  const state = {
+
+    unit: 'mm',
+
+    w: 35,
+
+    h: 45,
+
+    dpi: 300,
+
+    bgColor: '#ffffff',
+
+    autoBgReplace: true,
+
+    bgTolerance: 28,
+
+    brightness: 0,
+
+    contrast: 0,
+
+    saturation: 100,
+
+    sharpness: 1,
+
+    targetKb: 0,
+
+    attireScale: 1.0,
+
+    attireX: 0,
+
+    attireY: 0
+
+  };
+
+
+
+  // Preset Configurations
+
+  const PRESETS = {
+
+    india: { unit: 'mm', w: 35, h: 45, dpi: 300, label: '3.5 × 4.5 CM (India / Europe / UK / Australia / Pakistan)' },
+
+    usa: { unit: 'in', w: 2, h: 2, dpi: 300, label: '2 × 2 Inch (USA / Philippines / Schengen)' },
+
+    canada: { unit: 'mm', w: 50, h: 70, dpi: 300, label: '50 × 70 MM (Canada)' },
+
+    malaysia: { unit: 'mm', w: 35, h: 50, dpi: 300, label: '35 × 50 MM (Malaysia / Singapore)' },
+
+    japan: { unit: 'mm', w: 33, h: 48, dpi: 300, label: '33 × 48 MM (Japan & China)' },
+
+    idcard: { unit: 'mm', w: 25, h: 35, dpi: 300, label: '25 × 35 MM (Student / Stamp ID)' }
+
+  };
+
+
+
+  function getPixelDimensions() {
+
+    const dpi = state.dpi || 300;
+
+    let wPx = state.w;
+
+    let hPx = state.h;
+
+    if (state.unit === 'mm') {
+
+      wPx = Math.round((state.w * dpi) / 25.4);
+
+      hPx = Math.round((state.h * dpi) / 25.4);
+
+    } else if (state.unit === 'cm') {
+
+      wPx = Math.round((state.w * 10 * dpi) / 25.4);
+
+      hPx = Math.round((state.h * 10 * dpi) / 25.4);
+
+    } else if (state.unit === 'in') {
+
+      wPx = Math.round(state.w * dpi);
+
+      hPx = Math.round(state.h * dpi);
+
+    } else {
+
+      wPx = Math.round(state.w);
+
+      hPx = Math.round(state.h);
+
+    }
+
+    return { wPx: Math.max(100, wPx), hPx: Math.max(100, hPx) };
+
+  }
+
+
+
+  function updateDimLabels() {
+
+    const px = getPixelDimensions();
+
+    const txt = `${state.w} × ${state.h} ${state.unit.toUpperCase()} (${px.wPx} × ${px.hPx} px @ ${state.dpi} DPI)`;
+
+    const el1 = document.getElementById('activeDimLabel');
+
+    const el2 = document.getElementById('liveCanvasDimText');
+
+    const el3 = document.getElementById('singleFinalMetricsTxt');
+
+    if (el1) el1.textContent = txt;
+
+    if (el2) el2.textContent = txt;
+
+    if (el3) el3.textContent = txt;
+
+  }
+
+
+
+  // File Loader
+
+  window.loadPassportPhoto = function(file) {
+
+    if (!file || !file.type.startsWith('image/')) {
+
+      if (window.showToast) window.showToast('Please select a valid image file', 'error');
+
+      return;
+
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+      const img = new Image();
+
+      img.onload = function() {
+
+        rawUploadedImage = img;
+
+        document.getElementById('passportUploadView').style.display = 'none';
+
+        document.getElementById('passportMainStudio').style.display = 'block';
+
+        window.goToStep('size');
+
+        initAttireThumbs();
+
+      };
+
+      img.src = e.target.result;
+
+    };
+
+    reader.readAsDataURL(file);
+
+  };
+
+
+
+  // Step Navigation
+
+  window.goToStep = function(stepName) {
+
+    document.querySelectorAll('.passport-step-btn').forEach(btn => {
+
+      btn.classList.toggle('active', btn.getAttribute('data-step') === stepName);
+
+    });
+
+
+
+    document.querySelectorAll('.studio-panel').forEach(panel => {
+
+      panel.classList.remove('active');
+
+    });
+
+
+
+    const targetPanel = document.getElementById('stepPanel' + capitalize(stepName));
+
+    if (targetPanel) targetPanel.classList.add('active');
+
+
+
+    if (stepName === 'crop') {
+
+      initCropperStage();
+
+    } else if (stepName === 'background') {
+
+      renderBackgroundStage();
+
+    } else if (stepName === 'cloth') {
+
+      renderClothStage();
+
+    } else if (stepName === 'download') {
+
+      renderDownloadStage();
+
+    }
+
+  };
+
+
+
+  function capitalize(s) {
+
+    return s.charAt(0).toUpperCase() + s.slice(1);
+
+  }
+
+
+
+  // Step 1: Preset Selection
+
+  document.querySelectorAll('.country-preset-card').forEach(card => {
+
+    card.addEventListener('click', function() {
+
+      document.querySelectorAll('.country-preset-card').forEach(c => c.classList.remove('active'));
+
+      this.classList.add('active');
+
+      const pKey = this.getAttribute('data-preset');
+
+      const p = PRESETS[pKey];
+
+      if (p) {
+
+        state.unit = p.unit;
+
+        state.w = p.w;
+
+        state.h = p.h;
+
+        state.dpi = p.dpi;
+
+        document.getElementById('passportCustomW').value = p.w;
+
+        document.getElementById('passportCustomH').value = p.h;
+
+        document.getElementById('passportCustomUnit').value = p.unit;
+
+        document.getElementById('passportCustomDpi').value = p.dpi;
+
+        updateDimLabels();
+
+      }
+
+    });
+
+  });
+
+
+
+  // Custom Size Inputs
+
+  ['passportCustomW', 'passportCustomH', 'passportCustomUnit', 'passportCustomDpi'].forEach(id => {
+
+    const el = document.getElementById(id);
+
+    if (el) {
+
+      el.addEventListener('input', () => {
+
+        state.w = parseFloat(document.getElementById('passportCustomW').value) || 35;
+
+        state.h = parseFloat(document.getElementById('passportCustomH').value) || 45;
+
+        state.unit = document.getElementById('passportCustomUnit').value;
+
+        state.dpi = parseInt(document.getElementById('passportCustomDpi').value) || 300;
+
+        updateDimLabels();
+
+      });
+
+    }
+
+  });
+
+
+
+  // Step 2: Cropper Initialization
+
+  function initCropperStage() {
+
+    if (!rawUploadedImage) return;
+
+    const imgEl = document.getElementById('cropperSourceImg');
+
+    imgEl.src = rawUploadedImage.src;
+
+
+
+    if (cropperInstance) {
+
+      cropperInstance.destroy();
+
+    }
+
+
+
+    const dims = getPixelDimensions();
+
+    const ratio = dims.wPx / dims.hPx;
+
+
+
+    cropperInstance = new Cropper(imgEl, {
+
+      aspectRatio: ratio,
+
+      viewMode: 1,
+
+      dragMode: 'move',
+
+      autoCropArea: 0.85,
+
+      restore: false,
+
+      guides: true,
+
+      center: true,
+
+      highlight: false,
+
+      cropBoxMovable: true,
+
+      cropBoxResizable: true,
+
+      toggleDragModeOnDblclick: false
+
+    });
+
+  }
+
+
+
+  window.toggleFaceGuide = function() {
+
+    const overlay = document.getElementById('faceGuideOverlay');
+
+    const txt = document.getElementById('guideStatusTxt');
+
+    if (overlay.classList.contains('active')) {
+
+      overlay.classList.remove('active');
+
+      txt.textContent = 'OFF';
+
+      txt.style.color = 'var(--text-muted)';
+
+    } else {
+
+      overlay.classList.add('active');
+
+      txt.textContent = 'ON';
+
+      txt.style.color = 'var(--primary)';
+
+    }
+
+  };
+
+
+
+  window.rotateCropper = function(deg) { if (cropperInstance) cropperInstance.rotate(deg); };
+
+  window.zoomCropper = function(delta) { if (cropperInstance) cropperInstance.zoom(delta); };
+
+  window.resetCropper = function() { if (cropperInstance) cropperInstance.reset(); };
+
+  let flipX = 1;
+
+  window.flipCropperX = function() {
+
+    if (cropperInstance) {
+
+      flipX = -flipX;
+
+      cropperInstance.scaleX(flipX);
+
+    }
+
+  };
+
+
+
+  window.applyCropAndNext = function() {
+
+    if (!cropperInstance) return;
+
+    const dims = getPixelDimensions();
+
+    croppedBaseCanvas = cropperInstance.getCroppedCanvas({
+
+      width: dims.wPx,
+
+      height: dims.hPx,
+
+      imageSmoothingEnabled: true,
+
+      imageSmoothingQuality: 'high'
+
+    });
+
+    window.goToStep('background');
+
+  };
+
+
+
+  // Step 3: Background & Color Adjustment
+
+  function renderBackgroundStage() {
+
+    if (!croppedBaseCanvas) return;
+
+    const liveCanvas = document.getElementById('passportLiveCanvas');
+
+    const dims = getPixelDimensions();
+
+    liveCanvas.width = dims.wPx;
+
+    liveCanvas.height = dims.hPx;
+
+    const ctx = liveCanvas.getContext('2d');
+
+
+
+    // 1. Fill Selected Background Color
+
+    if (state.bgColor !== 'transparent') {
+
+      ctx.fillStyle = state.bgColor;
+
+      ctx.fillRect(0, 0, dims.wPx, dims.hPx);
+
+    } else {
+
+      ctx.clearRect(0, 0, dims.wPx, dims.hPx);
+
+    }
+
+
+
+    // 2. Draw Cropped Face with Filters
+
+    ctx.save();
+
+    ctx.filter = `brightness(${100 + state.brightness}%) contrast(${100 + state.contrast}%) saturate(${state.saturation}%)`;
+
+
+
+    if (state.autoBgReplace && state.bgColor !== 'transparent') {
+
+      // Smart Client-Side Background Color Replacement
+
+      const tempCanvas = document.createElement('canvas');
+
+      tempCanvas.width = dims.wPx;
+
+      tempCanvas.height = dims.hPx;
+
+      const tCtx = tempCanvas.getContext('2d');
+
+      tCtx.drawImage(croppedBaseCanvas, 0, 0, dims.wPx, dims.hPx);
+
+
+
+      const imgData = tCtx.getImageData(0, 0, dims.wPx, dims.hPx);
+
+      const data = imgData.data;
+
+
+
+      // Sample corners to detect original background color
+
+      const sampleCorners = [
+
+        [0, 0], [dims.wPx - 1, 0], [0, Math.floor(dims.hPx * 0.2)], [dims.wPx - 1, Math.floor(dims.hPx * 0.2)]
+
+      ];
+
+      let avgR = 0, avgG = 0, avgB = 0;
+
+      sampleCorners.forEach(([cx, cy]) => {
+
+        const idx = (cy * dims.wPx + cx) * 4;
+
+        avgR += data[idx];
+
+        avgG += data[idx + 1];
+
+        avgB += data[idx + 2];
+
+      });
+
+      avgR /= sampleCorners.length;
+
+      avgG /= sampleCorners.length;
+
+      avgB /= sampleCorners.length;
+
+
+
+      const tolerance = (state.bgTolerance / 100) * 255;
+
+      const [tr, tg, tb] = hexToRgb(state.bgColor);
+
+
+
+      for (let i = 0; i < data.length; i += 4) {
+
+        const r = data[i];
+
+        const g = data[i + 1];
+
+        const b = data[i + 2];
+
+        const a = data[i + 3];
+
+
+
+        if (a < 20) {
+
+          data[i] = tr; data[i + 1] = tg; data[i + 2] = tb; data[i + 3] = 255;
+
+          continue;
+
+        }
+
+
+
+        const dist = Math.sqrt((r - avgR)**2 + (g - avgG)**2 + (b - avgB)**2);
+
+        if (dist < tolerance) {
+
+          // Smooth blend
+
+          const factor = Math.max(0, Math.min(1, (tolerance - dist) / (tolerance * 0.4)));
+
+          data[i] = Math.round(r * (1 - factor) + tr * factor);
+
+          data[i + 1] = Math.round(g * (1 - factor) + tg * factor);
+
+          data[i + 2] = Math.round(b * (1 - factor) + tb * factor);
+
+        }
+
+      }
+
+
+
+      tCtx.putImageData(imgData, 0, 0);
+
+      ctx.drawImage(tempCanvas, 0, 0);
+
+    } else {
+
+      ctx.drawImage(croppedBaseCanvas, 0, 0, dims.wPx, dims.hPx);
+
+    }
+
+    ctx.restore();
+
+
+
+    bgProcessedCanvas = liveCanvas;
+
+  }
+
+
+
+  function hexToRgb(hex) {
+
+    if (!hex || hex === 'transparent' || !hex.startsWith('#')) return [255, 255, 255];
+
+    let c = hex.substring(1);
+
+    if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+
+    const num = parseInt(c, 16);
+
+    return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+
+  }
+
+
+
+  // Background Swatch Clicks
+
+  document.querySelectorAll('.color-swatch-btn').forEach(btn => {
+
+    btn.addEventListener('click', function() {
+
+      document.querySelectorAll('.color-swatch-btn').forEach(b => b.classList.remove('active'));
+
+      this.classList.add('active');
+
+      state.bgColor = this.getAttribute('data-color');
+
+      renderBackgroundStage();
+
+    });
+
+  });
+
+
+
+  document.getElementById('passportCustomBgColor').addEventListener('input', function() {
+
+    state.bgColor = this.value;
+
+    document.querySelectorAll('.color-swatch-btn').forEach(b => b.classList.remove('active'));
+
+    renderBackgroundStage();
+
+  });
+
+
+
+  document.getElementById('autoBgReplaceToggle').addEventListener('change', function() {
+
+    state.autoBgReplace = this.checked;
+
+    document.getElementById('bgToleranceBox').style.display = this.checked ? 'block' : 'none';
+
+    renderBackgroundStage();
+
+  });
+
+
+
+  document.getElementById('bgToleranceRange').addEventListener('input', function() {
+
+    state.bgTolerance = parseInt(this.value);
+
+    document.getElementById('bgToleranceVal').textContent = this.value + '%';
+
+    renderBackgroundStage();
+
+  });
+
+
+
+  // Lighting Sliders
+
+  document.getElementById('brightRange').addEventListener('input', function() {
+
+    state.brightness = parseInt(this.value);
+
+    document.getElementById('brightVal').textContent = (this.value > 0 ? '+' : '') + this.value + '%';
+
+    renderBackgroundStage();
+
+  });
+
+  document.getElementById('contrastRange').addEventListener('input', function() {
+
+    state.contrast = parseInt(this.value);
+
+    document.getElementById('contrastVal').textContent = (this.value > 0 ? '+' : '') + this.value + '%';
+
+    renderBackgroundStage();
+
+  });
+
+  document.getElementById('saturateRange').addEventListener('input', function() {
+
+    state.saturation = parseInt(this.value);
+
+    document.getElementById('saturateVal').textContent = this.value + '%';
+
+    renderBackgroundStage();
+
+  });
+
+
+
+  // Step 4: Attire Thumbnails & Selection
+
+  function initAttireThumbs() {
+
+    for (const [key, svg] of Object.entries(window.PASSPORT_ATTIRES || {})) {
+
+      const container = document.getElementById('thumb_' + key);
+
+      if (container && !container.hasChildNodes()) {
+
+        container.innerHTML = svg;
+
+      }
+
+    }
+
+  }
+
+
+
+  // Attire Category Filter
+
+  document.querySelectorAll('.attire-cat-btn').forEach(btn => {
+
+    btn.addEventListener('click', function() {
+
+      document.querySelectorAll('.attire-cat-btn').forEach(b => b.classList.remove('active'));
+
+      this.classList.add('active');
+
+      const cat = this.getAttribute('data-cat');
+
+      document.querySelectorAll('.attire-card').forEach(card => {
+
+        const itemCat = card.getAttribute('data-cat');
+
+        if (cat === 'all' || !itemCat || itemCat === cat) {
+
+          card.style.display = 'block';
+
+        } else {
+
+          card.style.display = 'none';
+
+        }
+
+      });
+
+    });
+
+  });
+
+
+
+  // Attire Card Selection
+
+  document.querySelectorAll('.attire-card').forEach(card => {
+
+    card.addEventListener('click', function() {
+
+      document.querySelectorAll('.attire-card').forEach(c => c.classList.remove('active'));
+
+      this.classList.add('active');
+
+      activeAttireKey = this.getAttribute('data-attire');
+
+
+
+      const adjustBox = document.getElementById('attireAdjustmentBox');
+
+      if (activeAttireKey === 'none') {
+
+        attireImageObj = null;
+
+        adjustBox.style.display = 'none';
+
+        renderClothStage();
+
+      } else {
+
+        adjustBox.style.display = 'block';
+
+        const svgCode = (window.PASSPORT_ATTIRES || {})[activeAttireKey];
+
+        if (svgCode) {
+
+          const img = new Image();
+
+          img.onload = function() {
+
+            attireImageObj = img;
+
+            renderClothStage();
+
+          };
+
+          img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svgCode);
+
+        }
+
+      }
+
+    });
+
+  });
+
+
+
+  // Attire Dragging on Canvas
+
+  let isDraggingAttire = false;
+
+  let dragStartX = 0, dragStartY = 0;
+
+  const clothCanvas = document.getElementById('passportClothCanvas');
+
+
+
+  clothCanvas.addEventListener('mousedown', startAttireDrag);
+
+  clothCanvas.addEventListener('touchstart', (e) => startAttireDrag(e.touches[0]));
+
+  window.addEventListener('mousemove', moveAttireDrag);
+
+  window.addEventListener('touchmove', (e) => moveAttireDrag(e.touches[0]));
+
+  window.addEventListener('mouseup', stopAttireDrag);
+
+  window.addEventListener('touchend', stopAttireDrag);
+
+
+
+  function startAttireDrag(e) {
+
+    if (activeAttireKey === 'none' || !attireImageObj) return;
+
+    isDraggingAttire = true;
+
+    dragStartX = e.clientX;
+
+    dragStartY = e.clientY;
+
+  }
+
+  function moveAttireDrag(e) {
+
+    if (!isDraggingAttire) return;
+
+    const dx = e.clientX - dragStartX;
+
+    const dy = e.clientY - dragStartY;
+
+    dragStartX = e.clientX;
+
+    dragStartY = e.clientY;
+
+
+
+    state.attireX += dx;
+
+    state.attireY += dy;
+
+    document.getElementById('attirePosXRange').value = state.attireX;
+
+    document.getElementById('attirePosYRange').value = state.attireY;
+
+    document.getElementById('attirePosXVal').textContent = state.attireX + 'px';
+
+    document.getElementById('attirePosYVal').textContent = state.attireY + 'px';
+
+    renderClothStage();
+
+  }
+
+  function stopAttireDrag() { isDraggingAttire = false; }
+
+
+
+  // Attire Sliders
+
+  document.getElementById('attireScaleRange').addEventListener('input', function() {
+
+    state.attireScale = parseInt(this.value) / 100;
+
+    document.getElementById('attireScaleVal').textContent = this.value + '%';
+
+    renderClothStage();
+
+  });
+
+  document.getElementById('attirePosYRange').addEventListener('input', function() {
+
+    state.attireY = parseInt(this.value);
+
+    document.getElementById('attirePosYVal').textContent = this.value + 'px';
+
+    renderClothStage();
+
+  });
+
+  document.getElementById('attirePosXRange').addEventListener('input', function() {
+
+    state.attireX = parseInt(this.value);
+
+    document.getElementById('attirePosXVal').textContent = this.value + 'px';
+
+    renderClothStage();
+
+  });
+
+  window.resetAttireTransform = function() {
+
+    state.attireScale = 1.0;
+
+    state.attireX = 0;
+
+    state.attireY = 0;
+
+    document.getElementById('attireScaleRange').value = 100;
+
+    document.getElementById('attireScaleVal').textContent = '100%';
+
+    document.getElementById('attirePosYRange').value = 0;
+
+    document.getElementById('attirePosYVal').textContent = '0px';
+
+    document.getElementById('attirePosXRange').value = 0;
+
+    document.getElementById('attirePosXVal').textContent = '0px';
+
+    renderClothStage();
+
+  };
+
+
+
+  function renderClothStage() {
+
+    if (!bgProcessedCanvas) return;
+
+    const dims = getPixelDimensions();
+
+    clothCanvas.width = dims.wPx;
+
+    clothCanvas.height = dims.hPx;
+
+    const ctx = clothCanvas.getContext('2d');
+
+
+
+    // 1. Draw Background Processed Image
+
+    ctx.drawImage(bgProcessedCanvas, 0, 0, dims.wPx, dims.hPx);
+
+
+
+    // 2. Draw Attire Overlay if selected
+
+    if (activeAttireKey !== 'none' && attireImageObj) {
+
+      ctx.save();
+
+      const attireW = dims.wPx * 1.15 * state.attireScale;
+
+      const attireH = dims.hPx * 0.9 * state.attireScale;
+
+      const x = (dims.wPx - attireW) / 2 + state.attireX;
+
+      const y = dims.hPx - attireH * 0.85 + state.attireY;
+
+
+
+      ctx.drawImage(attireImageObj, x, y, attireW, attireH);
+
+      ctx.restore();
+
+    }
+
+  }
+
+
+
+  // Step 5: Download & Print Stage
+
+  function renderDownloadStage() {
+
+    // 1. Render Final Single Photo Canvas
+
+    const singleCanvas = document.getElementById('passportSingleFinalCanvas');
+
+    const dims = getPixelDimensions();
+
+    singleCanvas.width = dims.wPx;
+
+    singleCanvas.height = dims.hPx;
+
+    const sCtx = singleCanvas.getContext('2d');
+
+
+
+    // Source from cloth stage canvas (or bgProcessedCanvas)
+
+    sCtx.drawImage(clothCanvas, 0, 0, dims.wPx, dims.hPx);
+
+
+
+    // Calculate Estimated Size
+
+    calcSingleEstSize();
+
+
+
+    // 2. Render Printable Sheet Canvas
+
+    renderSheetCanvas();
+
+  }
+
+
+
+  function calcSingleEstSize() {
+
+    const singleCanvas = document.getElementById('passportSingleFinalCanvas');
+
+    const format = document.getElementById('singlePhotoFormat').value;
+
+    const targetKb = state.targetKb;
+
+
+
+    getCompressedBlob(singleCanvas, format, targetKb, (blob) => {
+
+      const sizeKb = (blob.size / 1024).toFixed(1);
+
+      const badge = document.getElementById('singleEstSizeBadge');
+
+      if (badge) {
+
+        badge.textContent = sizeKb + ' KB';
+
+        badge.style.color = (targetKb > 0 && sizeKb > targetKb) ? '#ef4444' : 'var(--primary)';
+
+      }
+
+    });
+
+  }
+
+
+
+  // Iterative JPEG Compressor to meet Portal Target KB Size (e.g. < 50KB or < 20KB)
+
+  function getCompressedBlob(canvas, format, targetKb, callback) {
+
+    if (format === 'image/png' || targetKb === 0) {
+
+      canvas.toBlob(callback, format, 0.95);
+
+      return;
+
+    }
+
+
+
+    let minQ = 0.05, maxQ = 0.95, bestBlob = null;
+
+    let step = 0;
+
+
+
+    function testQuality(q) {
+
+      canvas.toBlob((b) => {
+
+        bestBlob = b;
+
+        const currentKb = b.size / 1024;
+
+        step++;
+
+
+
+        if (step > 6 || Math.abs(currentKb - targetKb) < 1.5) {
+
+          callback(bestBlob);
+
+          return;
+
+        }
+
+
+
+        if (currentKb > targetKb) {
+
+          maxQ = q;
+
+        } else {
+
+          minQ = q;
+
+        }
+
+        testQuality((minQ + maxQ) / 2);
+
+      }, 'image/jpeg', q);
+
+    }
+
+
+
+    testQuality(0.85);
+
+  }
+
+
+
+  // Target KB size pills click
+
+  document.querySelectorAll('.target-size-pill').forEach(pill => {
+
+    pill.addEventListener('click', function() {
+
+      document.querySelectorAll('.target-size-pill').forEach(p => p.classList.remove('active'));
+
+      this.classList.add('active');
+
+      state.targetKb = parseInt(this.getAttribute('data-targetkb')) || 0;
+
+      calcSingleEstSize();
+
+    });
+
+  });
+
+
+
+  document.getElementById('singlePhotoFormat').addEventListener('change', calcSingleEstSize);
+
+
+
+  // Single Photo Download
+
+  window.downloadSinglePhoto = function() {
+
+    const singleCanvas = document.getElementById('passportSingleFinalCanvas');
+
+    const format = document.getElementById('singlePhotoFormat').value;
+
+    const ext = format === 'image/png' ? 'png' : 'jpg';
+
+
+
+    getCompressedBlob(singleCanvas, format, state.targetKb, (blob) => {
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+
+      a.href = url;
+
+      a.download = `passport-photo-${state.w}x${state.h}${state.unit}.${ext}`;
+
+      a.click();
+
+      URL.revokeObjectURL(url);
+
+
+
+      if (window.showThankYouModal) {
+
+        window.showThankYouModal('Passport Photo', 'Your passport size photo has been downloaded successfully!');
+
+      } else if (window.showToast) {
+
+        window.showToast('Passport Photo Downloaded!', 'success');
+
+      }
+
+    });
+
+  };
+
+
+
+  // Printable Sheet Canvas Renderer (A4, 4x6, 5x7)
+
+  window.renderSheetCanvas = function() {
+
+    const sheetCanvas = document.getElementById('passportSheetCanvas');
+
+    const singleCanvas = document.getElementById('passportSingleFinalCanvas');
+
+    if (!sheetCanvas || !singleCanvas) return;
+
+
+
+    const paper = document.getElementById('sheetPaperSelect').value;
+
+    const isLandscape = document.getElementById('sheetOrientationSelect').value === 'landscape';
+
+    const cutLines = document.getElementById('sheetCutLinesToggle').checked;
+
+    const dpi = state.dpi || 300;
+
+
+
+    // Dimensions in mm
+
+    let sheetWmm = 210, sheetHmm = 297;
+
+    if (paper === '4x6') {
+
+      sheetWmm = 101.6; sheetHmm = 152.4; // 4x6 inches in mm
+
+    } else if (paper === '5x7') {
+
+      sheetWmm = 127; sheetHmm = 177.8;
+
+    }
+
+
+
+    if (isLandscape) {
+
+      const t = sheetWmm; sheetWmm = sheetHmm; sheetHmm = t;
+
+    }
+
+
+
+    const sheetWpx = Math.round((sheetWmm * dpi) / 25.4);
+
+    const sheetHpx = Math.round((sheetHmm * dpi) / 25.4);
+
+
+
+    sheetCanvas.width = sheetWpx;
+
+    sheetCanvas.height = sheetHpx;
+
+    const ctx = sheetCanvas.getContext('2d');
+
+
+
+    // Fill white paper background
+
+    ctx.fillStyle = '#ffffff';
+
+    ctx.fillRect(0, 0, sheetWpx, sheetHpx);
+
+
+
+    const marginMm = 8;
+
+    const gapMm = 3;
+
+    const marginPx = Math.round((marginMm * dpi) / 25.4);
+
+    const gapPx = Math.round((gapMm * dpi) / 25.4);
+
+
+
+    const dims = getPixelDimensions();
+
+    const photoWpx = dims.wPx;
+
+    const photoHpx = dims.hPx;
+
+
+
+    const cols = Math.floor((sheetWpx - 2 * marginPx + gapPx) / (photoWpx + gapPx));
+
+    const rows = Math.floor((sheetHpx - 2 * marginPx + gapPx) / (photoHpx + gapPx));
+
+    const maxPossible = Math.max(1, cols * rows);
+
+
+
+    const copiesInput = document.getElementById('sheetCopiesInput');
+
+    let reqCopies = parseInt(copiesInput.value) || maxPossible;
+
+    if (reqCopies > maxPossible) {
+
+      reqCopies = maxPossible;
+
+      copiesInput.value = maxPossible;
+
+    }
+
+
+
+    let count = 0;
+
+    for (let r = 0; r < rows; r++) {
+
+      for (let c = 0; c < cols; c++) {
+
+        if (count >= reqCopies) break;
+
+
+
+        const x = marginPx + c * (photoWpx + gapPx);
+
+        const y = marginPx + r * (photoHpx + gapPx);
+
+
+
+        // Draw photo
+
+        ctx.drawImage(singleCanvas, x, y, photoWpx, photoHpx);
+
+
+
+        // Draw Cutting Lines / Border
+
+        if (cutLines) {
+
+          ctx.save();
+
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+
+          ctx.lineWidth = Math.max(1, Math.round(dpi / 300));
+
+          ctx.setLineDash([4, 4]);
+
+          ctx.strokeRect(x, y, photoWpx, photoHpx);
+
+          ctx.restore();
+
+        }
+
+
+
+        count++;
+
+      }
+
+      if (count >= reqCopies) break;
+
+    }
+
+  };
+
+
+
+  // Download Sheet as Image
+
+  window.downloadSheetImage = function() {
+
+    const sheetCanvas = document.getElementById('passportSheetCanvas');
+
+    const paper = document.getElementById('sheetPaperSelect').value;
+
+    sheetCanvas.toBlob((blob) => {
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+
+      a.href = url;
+
+      a.download = `passport-photo-sheet-${paper}.jpg`;
+
+      a.click();
+
+      URL.revokeObjectURL(url);
+
+
+
+      if (window.showThankYouModal) {
+
+        window.showThankYouModal('Print Sheet', 'Your printable passport photo sheet has been downloaded!');
+
+      }
+
+    }, 'image/jpeg', 0.95);
+
+  };
+
+
+
+  // Download Sheet as PDF Document
+
+  window.downloadSheetPdf = async function() {
+
+    const sheetCanvas = document.getElementById('passportSheetCanvas');
+
+    const paper = document.getElementById('sheetPaperSelect').value;
+
+    const isLandscape = document.getElementById('sheetOrientationSelect').value === 'landscape';
+
+
+
+    if (typeof PDFLib === 'undefined') {
+
+      window.downloadSheetImage();
+
+      return;
+
+    }
+
+
+
+    try {
+
+      const pdfDoc = await PDFLib.PDFDocument.create();
+
+      let pageW = 595.28, pageH = 841.89; // A4 in points (72 DPI)
+
+      if (paper === '4x6') {
+
+        pageW = 4 * 72; pageH = 6 * 72;
+
+      } else if (paper === '5x7') {
+
+        pageW = 5 * 72; pageH = 7 * 72;
+
+      }
+
+
+
+      if (isLandscape) {
+
+        const t = pageW; pageW = pageH; pageH = t;
+
+      }
+
+
+
+      const page = pdfDoc.addPage([pageW, pageH]);
+
+      const imgDataUrl = sheetCanvas.toDataURL('image/jpeg', 0.95);
+
+      const jpgImage = await pdfDoc.embedJpg(imgDataUrl);
+
+
+
+      page.drawImage(jpgImage, {
+
+        x: 0,
+
+        y: 0,
+
+        width: pageW,
+
+        height: pageH
+
+      });
+
+
+
+      const pdfBytes = await pdfDoc.save();
+
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+
+      a.href = url;
+
+      a.download = `passport-photos-${paper}.pdf`;
+
+      a.click();
+
+      URL.revokeObjectURL(url);
+
+
+
+      if (window.showThankYouModal) {
+
+        window.showThankYouModal('PDF Sheet', 'Your printable PDF sheet has been downloaded successfully!');
+
+      }
+
+    } catch (e) {
+
+      console.error(e);
+
+      window.downloadSheetImage();
+
+    }
+
+  };
+
+
+
+  // Direct Browser Print
+
+  window.printSheetDirectly = function() {
+
+    const sheetCanvas = document.getElementById('passportSheetCanvas');
+
+    const paper = document.getElementById('sheetPaperSelect').value;
+
+    const isLandscape = document.getElementById('sheetOrientationSelect').value === 'landscape';
+
+
+
+    const win = window.open('', '_blank');
+
+    win.document.write(`
+
+      <!DOCTYPE html>
+
+      <html>
+
+        <head>
+
+          <title>Print Passport Photos</title>
+
+          <style>
+
+            @page { size: ${paper === '4x6' ? '4in 6in' : 'A4'} ${isLandscape ? 'landscape' : 'portrait'}; margin: 0; }
+
+            body { margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; }
+
+            img { width: 100vw; height: 100vh; object-fit: contain; }
+
+          </style>
+
+        </head>
+
+        <body onload="window.print(); window.close();">
+
+          <img src="${sheetCanvas.toDataURL('image/jpeg', 0.95)}" />
+
+        </body>
+
+      </html>
+
+    `);
+
+    win.document.close();
+
+  };
+
+
+
+  window.resetPassportTool = function() {
+
+    if (cropperInstance) cropperInstance.destroy();
+
+    cropperInstance = null;
+
+    rawUploadedImage = null;
+
+    croppedBaseCanvas = null;
+
+    bgProcessedCanvas = null;
+
+    attireImageObj = null;
+
+    activeAttireKey = 'none';
+
+
+
+    document.getElementById('passportFileInput').value = '';
+
+    document.getElementById('passportUploadView').style.display = 'block';
+
+    document.getElementById('passportMainStudio').style.display = 'none';
+
+  };
+
+
+
+  // Init labels on page load
+
+  updateDimLabels();
+
+})();
+
+</script>
+
+
+
 </main> <!-- End Main -->
+
+
 
 <!-- SANI VIRTUAL ASSISTANT FLOATING WIDGET -->
 <div id="sani-assistant-container" class="sani-floating">
@@ -890,58 +3445,114 @@ canvas#a4Canvas {
   </div>
 </div>
 
+
 <footer class="footer">
+
   <div class="container">
+
     <div class="footer-grid">
+
       <div class="footer-brand">
+
         <img src="/assets/images/branding/sanix-logo.svg" alt="Sanix Tool">
+
         <p>One Platform. Every Tool. Privacy-first online utilities running directly in your browser with high speed and zero data collection.</p>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Tool Categories</h5>
+
         <ul class="footer-links">
+
           <li><a href="/tools?category=image">Image Tools</a></li>
+
           <li><a href="/tools?category=pdf">PDF Tools</a></li>
+
           <li><a href="/tools?category=text">Text Utilities</a></li>
+
           <li><a href="/tools?category=developer">Developer Tools</a></li>
+
           <li><a href="/tools?category=calculator">Calculators</a></li>
+
           <li><a href="/tools?category=file">File Utilities</a></li>
+
         </ul>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Quick Links</h5>
+
         <ul class="footer-links">
+
           <li><a href="/tools">All Tools Directory</a></li>
+
           <li><a href="/favorites">Your Favorites</a></li>
+
           <li><a href="/about">About Sanix Tool</a></li>
+
           <li><a href="/contact">Contact & Feedback</a></li>
+
         </ul>
+
       </div>
 
+
+
       <div class="footer-col">
+
         <h5>Legal & Privacy</h5>
+
         <ul class="footer-links">
+
           <li><a href="/privacy">Privacy Policy</a></li>
+
           <li><a href="/terms">Terms of Service</a></li>
-          <li><a href="/tools/image/">Sanix Tool Platform</a></li>
+
+          <li><a href="/">Sanix Tool Platform</a></li>
+
         </ul>
+
       </div>
+
     </div>
+
+
 
     <div class="footer-bottom">
+
       <p>&copy; 2026 <strong>SANIX TOOL</strong>. Designed & Built for High Performance. Designed & Developed with ❤️ by <strong>Ankit Singh</strong>. All rights reserved.</p>
+
     </div>
+
   </div>
+
 </footer>
 
+
+
 <!-- JavaScript Scripts -->
+
 <script src="/assets/js/theme.js?v=1.0.0"></script>
+
 <script src="/assets/js/toast.js?v=1.0.0"></script>
+
 <script src="/assets/js/sani.js?v=1.0.0"></script>
+
 <script src="/assets/js/favorites.js?v=1.0.0"></script>
+
 <script src="/assets/js/search.js?v=1.0.0"></script>
+
 <script src="/assets/js/app.js?v=1.0.0"></script>
+
 </body>
+
 </html>
+
