@@ -12,7 +12,7 @@ $tools = [
   ['id' => 'image-converter', 'name' => 'Image Converter', 'desc' => 'Convert between JPG, PNG and WEBP image formats.', 'cat' => 'image', 'icon' => '🔄', 'link' => 'tools/image/converter.php'],
   ['id' => 'image-rotator', 'name' => 'Image Rotator', 'desc' => 'Rotate 90°, 180° or mirror flip images horizontally & vertically.', 'cat' => 'image', 'icon' => '🔃', 'link' => 'tools/image/rotator.php'],
   ['id' => 'bg-remover', 'name' => 'Background Remover', 'desc' => 'Isolate subjects, replace backgrounds with colors, gradients, images or blur.', 'cat' => 'image', 'icon' => '🪄', 'link' => 'tools/image/bg-remover.php'],
-  ['id' => 'id-photo', 'name' => 'ID / Passport Photo Maker', 'desc' => 'Create official passport & visa photos with custom dimensions & A4 print sheets.', 'cat' => 'image', 'icon' => '🪪', 'link' => 'tools/image/id-photo.php'],
+  ['id' => 'id-photo', 'name' => 'Passport Size Photo Maker', 'desc' => 'Create official passport & visa photos with custom dimensions, attire, background & A4 print sheets.', 'cat' => 'image', 'icon' => '🪪', 'link' => 'tools/image/passport-photo.php'],
   ['id' => 'image-to-pdf', 'name' => 'Image to PDF', 'desc' => 'Combine multiple photos or documents into a single PDF with layout options.', 'cat' => 'image', 'icon' => '📄', 'link' => 'tools/image/image-to-pdf.php'],
   ['id' => 'pdf-merger', 'name' => 'PDF Merger', 'desc' => 'Merge multiple PDF files into one single PDF document.', 'cat' => 'pdf', 'icon' => '📚', 'link' => 'tools/pdf/merger.php'],
   ['id' => 'pdf-splitter', 'name' => 'PDF Splitter', 'desc' => 'Extract selected pages or split PDF document ranges.', 'cat' => 'pdf', 'icon' => '✂️', 'link' => 'tools/pdf/splitter.php'],
